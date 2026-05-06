@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import { Link } from "react-router";
 import Stack from "@mui/material/Stack";
 import { Skeleton } from "@mui/material";
@@ -5,8 +6,9 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { RootState } from "../../redux/store";
 import Pagination from "@mui/material/Pagination";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { getSpecialtiesByCafedra, getAllSpecialties, Specialty } from "../../services/specialty/specialtyService";
+import { getSpecialtiesByCafedra, getAllSpecialties, deleteSpecialty, Specialty } from "../../services/specialty/specialtyService";
 
 export default function Specialties() {
     const [end, setEnd] = useState<number>(6);
@@ -48,6 +50,37 @@ export default function Specialties() {
             setLoading(false);
         }
     }, []);
+
+    const handleDelete = async (
+        e: React.MouseEvent,
+        code: string,
+        name: string
+    ) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const result = await Swal.fire({
+            title: "Silmək istədiyinizə əminsiniz?",
+            text: `"${name}" ixtisası silinəcək. Bu əməliyyat geri alına bilməz.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            confirmButtonText: "Sil",
+            cancelButtonText: "Ləğv et",
+        });
+        if (!result.isConfirmed) return;
+
+        const res = await deleteSpecialty(code);
+        if (res === "SUCCESS") {
+            setSpecialties((prev) => prev.filter((s) => s.specialty_code !== code));
+            setSpecialtyLength((prev) => Math.max(0, prev - 1));
+            Swal.fire("Silindi", "İxtisas uğurla silindi.", "success");
+        } else if (res === "NOT FOUND") {
+            Swal.fire("Tapılmadı", "Bu ixtisas artıq mövcud deyil.", "info");
+            setSpecialties((prev) => prev.filter((s) => s.specialty_code !== code));
+        } else {
+            Swal.fire("Xəta!", "İxtisas silinə bilmədi.", "error");
+        }
+    };
 
     const filtered = specialties.filter((s) =>
         s.specialty_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -94,33 +127,50 @@ export default function Specialties() {
                           </div>
                       ))
                     : filtered.map((specialty, index) => (
-                          <Link
+                          <div
                               key={index}
-                              to="/specialty-details"
-                              state={{ specialtyCode: specialty.specialty_code, specialtyName: specialty.specialty_name }}
-                              className="group flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:border-brand-300 hover:shadow-lg dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-700"
+                              className="group relative flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:border-brand-300 hover:shadow-lg dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-700"
                           >
-                              {/* Top row: code badge + degree badge */}
-                              <div className="flex items-center justify-between">
-                                  <span className="inline-flex items-center rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                                      {specialty.specialty_code}
-                                  </span>
-                                  <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
-                                      İxtisas
-                                  </span>
-                              </div>
+                              <button
+                                  type="button"
+                                  onClick={(e) =>
+                                      handleDelete(
+                                          e,
+                                          specialty.specialty_code,
+                                          specialty.specialty_name
+                                      )
+                                  }
+                                  className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg text-gray-400 opacity-0 transition hover:bg-error-50 hover:text-error-600 group-hover:opacity-100 dark:hover:bg-error-500/10"
+                                  aria-label="Sil"
+                                  title="Sil"
+                              >
+                                  <DeleteOutlineIcon fontSize="small" />
+                              </button>
 
-                              {/* Specialty name */}
-                              <p className="line-clamp-2 text-base font-semibold text-gray-800 leading-snug dark:text-white/90">
-                                  {specialty.specialty_name}
-                              </p>
+                              <Link
+                                  to="/specialty-details"
+                                  state={{ specialtyCode: specialty.specialty_code, specialtyName: specialty.specialty_name }}
+                                  className="flex flex-col gap-3"
+                              >
+                                  <div className="flex items-center justify-between pr-9">
+                                      <span className="inline-flex items-center rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                                          {specialty.specialty_code}
+                                      </span>
+                                      <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
+                                          İxtisas
+                                      </span>
+                                  </div>
 
-                              {/* Bottom: arrow link */}
-                              <div className="flex items-center gap-1 text-sm font-medium text-brand-500 transition-all group-hover:gap-2 dark:text-brand-400">
-                                  Ətraflı bax
-                                  <ArrowForwardIcon sx={{ fontSize: 16 }} />
-                              </div>
-                          </Link>
+                                  <p className="line-clamp-2 text-base font-semibold text-gray-800 leading-snug dark:text-white/90">
+                                      {specialty.specialty_name}
+                                  </p>
+
+                                  <div className="flex items-center gap-1 text-sm font-medium text-brand-500 transition-all group-hover:gap-2 dark:text-brand-400">
+                                      Ətraflı bax
+                                      <ArrowForwardIcon sx={{ fontSize: 16 }} />
+                                  </div>
+                              </Link>
+                          </div>
                       ))}
             </div>
 

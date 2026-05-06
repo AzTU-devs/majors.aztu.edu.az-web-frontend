@@ -37,8 +37,7 @@ export interface SubjectDetails {
 export const getCurriculaBySpecialtyCode = async (specialtyCode: string, start: number, end: number) => {
     try {
         const response = await apiClient.get(
-            `/api/curricula/${specialtyCode}/subjects?start=${start}&end=${end}&lang=${lang_code}`,
-            { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+            `/api/curricula/${specialtyCode}/subjects?start=${start}&end=${end}&lang=${lang_code}`
         );
         if (response.data.statusCode === 200) {
             return {
@@ -61,8 +60,7 @@ export const addCurricula = async (subjectPayload: SubjectPayload) => {
     try {
         const response = await apiClient.post(
             "/api/curricula/create",
-            subjectPayload,
-            { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+            subjectPayload
         );
         if (response.data.statusCode === 201) {
             return "SUCCESS";

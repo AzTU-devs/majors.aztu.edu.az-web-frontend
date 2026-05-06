@@ -1,15 +1,38 @@
 import { ReactNode } from "react";
 
+type Variant = "primary" | "outline" | "secondary" | "ghost" | "destructive";
+type Size = "sm" | "md" | "lg";
+
 interface ButtonProps {
-  children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline"; // Button variant
-  startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
-  disabled?: boolean; // Disabled state
-  className?: string; // Disabled state
+  children: ReactNode;
+  size?: Size;
+  variant?: Variant;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  type?: "button" | "submit" | "reset";
 }
+
+const sizeClasses: Record<Size, string> = {
+  sm: "px-4 py-2.5 text-sm rounded-xl",
+  md: "px-5 py-3 text-sm rounded-xl",
+  lg: "px-6 py-3.5 text-base rounded-2xl",
+};
+
+const variantClasses: Record<Variant, string> = {
+  primary:
+    "brand-gradient text-white shadow-glow hover:brightness-110 hover:shadow-elevated disabled:opacity-50 disabled:hover:brightness-100",
+  secondary:
+    "bg-brand-50 text-brand-700 hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-200 dark:hover:bg-brand-500/20",
+  outline:
+    "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 hover:ring-gray-300 dark:bg-gray-900 dark:text-gray-200 dark:ring-white/10 dark:hover:bg-white/5 dark:hover:ring-white/20",
+  ghost:
+    "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5",
+  destructive:
+    "bg-error-500 text-white shadow-soft hover:bg-error-600 disabled:opacity-50",
+};
 
 const Button: React.FC<ButtonProps> = ({
   children,
@@ -20,28 +43,16 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   className = "",
   disabled = false,
+  type = "button",
 }) => {
-  // Size Classes
-  const sizeClasses = {
-    sm: "px-4 py-3 text-sm",
-    md: "px-5 py-3.5 text-sm",
-  };
-
-  // Variant Classes
-  const variantClasses = {
-    primary:
-      "bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300",
-    outline:
-      "bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300",
-  };
-
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${className} ${
+      type={type}
+      className={`group inline-flex items-center justify-center gap-2 font-medium transition duration-200 ease-out focus-ring active:scale-[0.98] ${
         sizeClasses[size]
       } ${variantClasses[variant]} ${
-        disabled ? "cursor-not-allowed opacity-50" : ""
-      }`}
+        disabled ? "cursor-not-allowed opacity-60 active:scale-100" : ""
+      } ${className}`}
       onClick={onClick}
       disabled={disabled}
     >

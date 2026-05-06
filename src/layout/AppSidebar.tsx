@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router";
 import SchoolIcon from "@mui/icons-material/School";
 import HomeFilledIcon from "@mui/icons-material/HomeFilled";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -22,6 +23,7 @@ const sistemItems: NavItem[] = [
 ];
 
 const akademikItems: NavItem[] = [
+  { icon: <AccountBalanceIcon />, name: "Fakültələr", path: "/faculties" },
   { icon: <SchoolIcon />, name: "İxtisaslar", path: "/specialties" },
   { icon: <MenuBookIcon />, name: "Ədəbiyyat", path: "/literatures" },
 ];
@@ -189,7 +191,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 lg:mt-0
+      className={`fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-gray-200/70 bg-white/85 px-5 text-gray-900 backdrop-blur-xl transition-all duration-300 ease-out dark:border-white/5 dark:bg-gray-900/80 lg:mt-0
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
@@ -198,15 +200,18 @@ const AppSidebar: React.FC = () => {
     >
       {/* Logo */}
       <div className={`flex py-6 ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
-        <Link to="/">
-          {showLabel ? (
-            <>
-              <img className="dark:hidden" src="/aztu-logo-dark.webp" alt="AzTU" height={40} style={{ maxHeight: 40 }} />
-              <img className="hidden dark:block" src="/aztu-logo-light.png" alt="AzTU" height={40} style={{ maxHeight: 40 }} />
-            </>
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-white">
-              A
+        <Link to="/" className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl brand-gradient text-sm font-bold text-white shadow-glow ring-1 ring-white/20">
+            A
+          </div>
+          {showLabel && (
+            <div className="leading-tight">
+              <div className="text-sm font-semibold tracking-tight text-gray-900 dark:text-white">
+                AZTU Majors
+              </div>
+              <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                İdarəetmə paneli
+              </div>
             </div>
           )}
         </Link>

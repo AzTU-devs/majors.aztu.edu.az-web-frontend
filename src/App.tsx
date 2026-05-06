@@ -13,11 +13,13 @@ import TopicsPage from "./pages/TopicsPage/TopicsPage";
 import NewCloPage from "./pages/NewCloPage/NewCloPage";
 import SubjectsPage from "./pages/SubjectsPage/SubjectsPage";
 import NewTopicPage from "./pages/NewTopicPage/NewTopicPage";
+import RequireAuth from "./components/auth/RequireAuth";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import NewSubjectPage from "./pages/NewSubjectPage/NewSubjectPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import NewSpecCharPage from "./pages/NewSpecCharPage/NewSpecCharPage";
 import SpecialtiesPage from "./pages/SpecialtiesPage/SpecialtiesPage";
+import FacultiesPage from "./pages/FacultiesPage/FacultiesPage";
 import LiteraturesPage from "./pages/LiteraturesPage/LiteraturesPage";
 import SubjectDeails from "./components/subjectDetails/SubjectDetails";
 import NewSpecialtyPage from "./pages/NewSpecialtyPage/NewSpecialtyPage";
@@ -35,11 +37,15 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
+          <Route element={<RequireAuth />}>
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
+
+            {/* Faculties */}
+            <Route path="/faculties" element={<FacultiesPage />} />
 
             {/* Specialties */}
             <Route path="/specialties" element={<SpecialtiesPage />} />
@@ -84,6 +90,7 @@ export default function App() {
             <Route path="/literatures" element={<LiteraturesPage />} />
             <Route path="/new-literature" element={<NewLiteraturePage />} />
 
+          </Route>
           </Route>
 
           {/* Auth Layout */}

@@ -15,12 +15,12 @@ const AppHeader: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-99999 flex w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
+    <header className="sticky top-0 z-99999 flex w-full border-b border-gray-200/70 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-gray-900/70">
       <div className="flex w-full items-center justify-between px-4 py-3.5 lg:px-6">
         {/* Left: toggle + mobile logo + institution label */}
         <div className="flex items-center gap-3">
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 dark:border-gray-800 dark:text-gray-400"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200/80 bg-white/70 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
           >

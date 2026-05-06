@@ -30,122 +30,112 @@ export default function SignInForm() {
         return;
       }
       setLoading(true);
-      const credentials = {
-        fin_kod: finKod,
-        password: password
-      };
-
+      const credentials = { fin_kod: finKod, password };
       const result = await signin(credentials);
 
       if (typeof result === "object") {
         dispatch(loginSuccess(result));
         navigate("/");
       } else if (result === "UNAUTHORIZED") {
-        Swal.fire(
-          "Xəta!",
-          "Fin kod və ya şifrə yanlışdır.",
-          "error"
-        ).then(() => {
-          setLoading(false);
-        })
+        Swal.fire("Xəta!", "Fin kod və ya şifrə yanlışdır.", "error").then(() =>
+          setLoading(false)
+        );
       } else {
-        Swal.fire(
-          "Xəta!",
-          "Gözlənilməz xəta baş verdi.",
-          "error"
-        ).then(() => {
-          setLoading(false);
-        })
+        Swal.fire("Xəta!", "Gözlənilməz xəta baş verdi.", "error").then(() =>
+          setLoading(false)
+        );
       }
-    } catch (e) {
-      Swal.fire(
-        "Xəta!",
-        "Gözlənilməz xəta baş verdi.",
-        "error"
-      ).then(() => {
-        setLoading(false);
-      })
+    } catch {
+      Swal.fire("Xəta!", "Gözlənilməz xəta baş verdi.", "error").then(() =>
+        setLoading(false)
+      );
     }
-  }
-  return (
-    <div className="flex flex-col flex-1">
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <div>
-          <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Daxil Ol
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Daxil olmaq üçün fin kod və şifrəni daxil edin!
-            </p>
-          </div>
-          <div>
-            <form onSubmit={handleSignIn}>
-              <div className="space-y-6">
-                <div>
-                  <Label>
-                    Fin kod <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <Input
-                    type="text"
-                    value={finKod}
-                    onChange={(e) => setFinKod(e.target.value.toUpperCase())}
-                    placeholder="Fin kod"
-                  />
-                </div>
-                <div>
-                  <Label>
-                    Şifrə <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Şifrə"
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-end">
-                  <Link
-                    to="/reset-password"
-                    className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                  >
-                    Şifrəni unutdum?
-                  </Link>
-                </div>
-                <div>
-                  <Button className="w-full" size="sm" disabled={loading}>
-                    {loading ? "Daxil Olunur..." : "Daxil Ol"}
-                  </Button>
-                </div>
-              </div>
-            </form>
+  };
 
-            <div className="mt-5">
-              <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Hesabınız yoxdur?
-                <Link
-                  to="/signup"
-                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                >
-                  Qeydiyyat
-                </Link>
-              </p>
-            </div>
+  return (
+    <div className="flex flex-col">
+      <div className="mb-8">
+        <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
+          AZTU
+        </span>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+          Xoş gəldiniz
+        </h1>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          Hesabınıza daxil olmaq üçün fin kod və şifrəni daxil edin.
+        </p>
+      </div>
+
+      <form onSubmit={handleSignIn} className="space-y-5">
+        <div>
+          <Label>
+            Fin kod <span className="text-error-500">*</span>
+          </Label>
+          <Input
+            type="text"
+            value={finKod}
+            onChange={(e) => setFinKod(e.target.value.toUpperCase())}
+            placeholder="ADMIN001"
+            autoComplete="username"
+          />
+        </div>
+
+        <div>
+          <Label>
+            Şifrə <span className="text-error-500">*</span>
+          </Label>
+          <div className="relative">
+            <Input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
+              aria-label={showPassword ? "Şifrəni gizlət" : "Şifrəni göstər"}
+            >
+              {showPassword ? (
+                <EyeIcon className="size-5 fill-current" />
+              ) : (
+                <EyeCloseIcon className="size-5 fill-current" />
+              )}
+            </button>
           </div>
         </div>
-      </div>
+
+        <div className="flex items-center justify-end">
+          <Link
+            to="/reset-password"
+            className="text-sm font-medium text-brand-600 transition hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
+          >
+            Şifrəni unutdum?
+          </Link>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full"
+          size="lg"
+          disabled={loading}
+        >
+          {loading ? "Daxil olunur..." : "Daxil ol"}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+        Hesabınız yoxdur?{" "}
+        <Link
+          to="/signup"
+          className="font-medium text-brand-600 hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
+        >
+          Qeydiyyatdan keç
+        </Link>
+      </p>
     </div>
   );
 }

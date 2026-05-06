@@ -1,18 +1,49 @@
+import Swal from "sweetalert2";
 import { Link } from "react-router";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import SchoolIcon from "@mui/icons-material/School";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { RootState } from "../../redux/store";
 import { useLocation, useNavigate } from "react-router";
-import { getPloBySpecailty, Plo } from "../../services/plo/ploService";
-import { getSloBySpecialty, Slo } from "../../services/slo/sloService";
-import { Gco, getGcosBySpecailty } from "../../services/gco/gcoService";
-import { Competency, getCompetencyBySpecialty } from "../../services/competency/competencyService";
-import { getSpecialtyChar, SpecialtyChar } from "../../services/specialtCharacteristics/specialtyChar";
+import { getPloBySpecailty, deletePlo, Plo } from "../../services/plo/ploService";
+import { getSloBySpecialty, deleteSlo, Slo } from "../../services/slo/sloService";
+import { Gco, getGcosBySpecailty, deleteGco } from "../../services/gco/gcoService";
+import { Competency, getCompetencyBySpecialty, deleteCompetency } from "../../services/competency/competencyService";
+import { getSpecialtyChar, deleteSpecialtyChar, SpecialtyChar } from "../../services/specialtCharacteristics/specialtyChar";
 import SectionTabStrip from "../common/SectionTabStrip";
 import EmptyState from "../common/EmptyState";
+
+const confirmDelete = async (label: string) =>
+  (
+    await Swal.fire({
+      title: "Silmək istədiyinizə əminsiniz?",
+      text: `"${label}" silinəcək.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      confirmButtonText: "Sil",
+      cancelButtonText: "Ləğv et",
+    })
+  ).isConfirmed;
+
+const handleAfterDelete = async (
+  result: string,
+  successMsg: string,
+  onSuccess: () => void
+) => {
+  if (result === "SUCCESS") {
+    onSuccess();
+    Swal.fire("Silindi", successMsg, "success");
+  } else if (result === "NOT FOUND") {
+    onSuccess();
+    Swal.fire("Tapılmadı", "Element artıq mövcud deyil.", "info");
+  } else {
+    Swal.fire("Xəta!", "Silinə bilmədi.", "error");
+  }
+};
 
 type TabKey = "overview" | "plo" | "slo" | "gco" | "competency" | "curriculum";
 
@@ -183,6 +214,22 @@ export default function SpecialtyDetails() {
                       : specialtyChar.degree_requirements || "—"}
                   </p>
                 </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={async () => {
+                      if (!(await confirmDelete("Ümumi məlumat"))) return;
+                      const res = await deleteSpecialtyChar(specialtyCode);
+                      handleAfterDelete(res, "Ümumi məlumat silindi.", () => {
+                        setSpecilatyChar(undefined);
+                        setCharNoContent(true);
+                      });
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl border border-error-200 bg-white px-4 py-2 text-sm font-medium text-error-600 transition hover:bg-error-50 dark:border-error-500/30 dark:bg-transparent dark:hover:bg-error-500/10"
+                  >
+                    <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+                    Sil
+                  </button>
+                </div>
               </>
             ) : charNoContent ? (
               <EmptyState
@@ -211,14 +258,27 @@ export default function SpecialtyDetails() {
                 {plo.map((item, index) => (
                   <div
                     key={index}
-                    className="flex gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
+                    className="group flex items-start gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
                   >
                     <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
                       {index + 1}
                     </span>
-                    <p className="pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    <p className="flex-1 pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                       {item.plo_content}
                     </p>
+                    <button
+                      onClick={async () => {
+                        if (!(await confirmDelete(item.plo_code))) return;
+                        const res = await deletePlo(item.plo_code);
+                        handleAfterDelete(res, "PLO silindi.", () => {
+                          setPlo((prev) => prev.filter((p) => p.plo_code !== item.plo_code));
+                        });
+                      }}
+                      className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
+                      aria-label="Sil"
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </button>
                   </div>
                 ))}
                 <div className="flex justify-end pt-2">
@@ -259,14 +319,27 @@ export default function SpecialtyDetails() {
                 {slo.map((item, index) => (
                   <div
                     key={index}
-                    className="flex gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
+                    className="group flex items-start gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
                   >
                     <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
                       {index + 1}
                     </span>
-                    <p className="pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    <p className="flex-1 pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                       {item.slo_content}
                     </p>
+                    <button
+                      onClick={async () => {
+                        if (!(await confirmDelete(item.slo_code))) return;
+                        const res = await deleteSlo(item.slo_code);
+                        handleAfterDelete(res, "SLO silindi.", () => {
+                          setSlo((prev) => prev.filter((p) => p.slo_code !== item.slo_code));
+                        });
+                      }}
+                      className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
+                      aria-label="Sil"
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </button>
                   </div>
                 ))}
                 <div className="flex justify-end pt-2">
@@ -307,9 +380,9 @@ export default function SpecialtyDetails() {
                 {gco.map((item, index) => (
                   <div
                     key={index}
-                    className="overflow-hidden rounded-xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+                    className="group overflow-hidden rounded-xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
                   >
-                    <div className="border-b border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/50">
+                    <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/50">
                       <div className="flex items-center gap-3">
                         <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-600 dark:bg-brand-500/20 dark:text-brand-400">
                           {index + 1}
@@ -318,6 +391,19 @@ export default function SpecialtyDetails() {
                           {item.career_title}
                         </h5>
                       </div>
+                      <button
+                        onClick={async () => {
+                          if (!(await confirmDelete(item.career_title))) return;
+                          const res = await deleteGco(item.career_code);
+                          handleAfterDelete(res, "Məzun imkanı silindi.", () => {
+                            setGco((prev) => prev.filter((p) => p.career_code !== item.career_code));
+                          });
+                        }}
+                        className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
+                        aria-label="Sil"
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </button>
                     </div>
                     <p className="p-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                       {item.career_content}
@@ -362,14 +448,29 @@ export default function SpecialtyDetails() {
                 {competency.map((item, index) => (
                   <div
                     key={index}
-                    className="flex gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
+                    className="group flex items-start gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
                   >
                     <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
                       {index + 1}
                     </span>
-                    <p className="pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    <p className="flex-1 pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                       {item.competency_content}
                     </p>
+                    <button
+                      onClick={async () => {
+                        if (!(await confirmDelete(item.competency_code))) return;
+                        const res = await deleteCompetency(item.competency_code);
+                        handleAfterDelete(res, "Kompetensiya silindi.", () => {
+                          setCompetency((prev) =>
+                            prev.filter((p) => p.competency_code !== item.competency_code)
+                          );
+                        });
+                      }}
+                      className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
+                      aria-label="Sil"
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </button>
                   </div>
                 ))}
                 <div className="flex justify-end pt-2">

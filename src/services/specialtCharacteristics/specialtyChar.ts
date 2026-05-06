@@ -65,3 +65,14 @@ export const getSpecialtyChar = async (specialtyCode: string, token: string) => 
         return "ERROR";
     }
 };
+export const deleteSpecialtyChar = async (specialtyCode: string) => {
+    try {
+        const response = await apiClient.delete(`/api/specialty-characteristics/${specialtyCode}`);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};

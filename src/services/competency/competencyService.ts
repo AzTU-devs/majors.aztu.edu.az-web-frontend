@@ -67,3 +67,14 @@ export const addCompetency = async (competencyPayload: CompetencyPayload, token:
         throw error;
     }
 }
+export const deleteCompetency = async (competencyCode: string) => {
+    try {
+        const response = await apiClient.delete(`/api/competency/${competencyCode}`);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};

@@ -63,3 +63,14 @@ export const addPlo = async (ploPayload: PloPayload, token: string) => {
         throw error;
     }
 }
+export const deletePlo = async (ploCode: string) => {
+    try {
+        const response = await apiClient.delete(`/api/plo/${ploCode}`);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};

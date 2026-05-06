@@ -67,3 +67,14 @@ export const addSlo = async (sloPayload: SloPayload, token: string) => {
         throw error;
     }
 }
+export const deleteSlo = async (sloCode: string) => {
+    try {
+        const response = await apiClient.delete(`/api/slo/${sloCode}`);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};

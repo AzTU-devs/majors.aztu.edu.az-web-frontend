@@ -58,6 +58,18 @@ export const getSpecialtiesByCafedra = async (cafedraCode: string, token: string
     }
 }
 
+export const deleteSpecialty = async (specialtyCode: string) => {
+    try {
+        const response = await apiClient.delete(`/api/specialty/${specialtyCode}`);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};
+
 export const getAllSpecialties = async (token: string) => {
     try {
         const response = await apiClient.get(`/api/specialties?lang=${lang_code}`, {
