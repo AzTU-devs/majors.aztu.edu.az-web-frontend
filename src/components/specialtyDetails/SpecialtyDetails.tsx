@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import SchoolIcon from "@mui/icons-material/School";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import { RootState } from "../../redux/store";
 import { useLocation, useNavigate } from "react-router";
 import { getPloBySpecailty, deletePlo, Plo } from "../../services/plo/ploService";
@@ -13,6 +15,7 @@ import { getSloBySpecialty, deleteSlo, Slo } from "../../services/slo/sloService
 import { Gco, getGcosBySpecailty, deleteGco } from "../../services/gco/gcoService";
 import { Competency, getCompetencyBySpecialty, deleteCompetency } from "../../services/competency/competencyService";
 import { getSpecialtyChar, deleteSpecialtyChar, SpecialtyChar } from "../../services/specialtCharacteristics/specialtyChar";
+import { Subject, getCurriculaBySpecialtyCode, deleteCurricula } from "../../services/curricula/curricula";
 import SectionTabStrip from "../common/SectionTabStrip";
 import EmptyState from "../common/EmptyState";
 
@@ -169,6 +172,48 @@ export default function SpecialtyDetails() {
     };
     getCompetencies();
   }, []);
+
+  // Curriculum / Subjects
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [subjectsNoContent, setSubjectsNoContent] = useState(false);
+
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        setSubjectsLoading(true);
+        const result = await getCurriculaBySpecialtyCode(specialtyCode, 0, 100);
+        if (typeof result === "object" && result.subjects) {
+          if (result.subjects.length === 0) {
+            setSubjectsNoContent(true);
+          } else {
+            setSubjects(result.subjects);
+          }
+        } else if (result === "NOT FOUND") {
+          setSubjectsNoContent(true);
+        } else {
+          setSubjectsNoContent(true);
+        }
+      } catch (e) {
+        setSubjectsNoContent(true);
+      } finally {
+        setSubjectsLoading(false);
+      }
+    };
+    fetchSubjects();
+  }, []);
+
+  const handleDeleteSubject = async (code: string, name: string) => {
+    if (!(await confirmDelete(name))) return;
+    const res = await deleteCurricula(code, token ? token : "");
+    handleAfterDelete(res ?? "ERROR", "Fənn silindi.", () => {
+      setSubjects((prev) => {
+        const next = prev.filter((s) => s.subject_code !== code);
+        if (next.length === 0) setSubjectsNoContent(true);
+        return next;
+      });
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -505,22 +550,111 @@ export default function SpecialtyDetails() {
 
         {/* CURRICULUM TAB */}
         {activeTab === "curriculum" && (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-brand-200 bg-brand-50/50 p-10 text-center dark:border-brand-500/30 dark:bg-brand-500/[0.05]">
-            <SchoolIcon className="mb-3 text-brand-500" sx={{ fontSize: 52 }} />
-            <h3 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
-              Kurikulum və Fənlər
-            </h3>
-            <p className="mb-6 max-w-sm text-sm text-gray-500 dark:text-gray-400">
-              Bu proqramdakı bütün fənləri və kurikulumu idarə edin
-            </p>
-            <Link
-              to="/specialty-details/subjects"
-              state={{ specialtyCode, specialtyName }}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-6 py-3 font-medium text-white transition-colors hover:bg-brand-600"
-            >
-              Kurikuluma keç
-              <ArrowForwardIcon sx={{ fontSize: 18 }} />
-            </Link>
+          <div className="space-y-3">
+            {subjectsLoading ? (
+              <div className="space-y-3">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+                ))}
+              </div>
+            ) : subjects.length > 0 ? (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h4 className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                    Kurikulum və Fənlər
+                  </h4>
+                  <Link
+                    to="/specialty-details/subjects/subject-matching-table"
+                    state={{ specialtyCode }}
+                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:bg-gray-800"
+                  >
+                    <TableChartIcon sx={{ fontSize: 16 }} />
+                    Fənn uyğunluq cədvəli
+                  </Link>
+                </div>
+
+                {subjects.map((subject) => (
+                  <div
+                    key={subject.subject_code}
+                    className="group flex flex-wrap items-center gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
+                  >
+                    <span className="inline-flex items-center rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                      {subject.subject_code}
+                    </span>
+                    <p className="flex-1 text-sm font-medium text-gray-800 dark:text-white/90">
+                      {subject.subject_name}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                      {subject.semester != null && <span>Semestr {subject.semester}</span>}
+                      {subject.credit != null && <span>{subject.credit} kredit</span>}
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-400">
+                      <Link
+                        to="/specialty-details/subjects/subject-details"
+                        state={{ subjectCode: subject.subject_code, specialtyCode, specialtyName }}
+                        className="grid h-8 w-8 place-items-center rounded-lg transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-500/10"
+                        aria-label="Detallar"
+                        title="Detallar"
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </Link>
+                      <Link
+                        to="/specialty-details/subjects/topics"
+                        state={{ subjectCode: subject.subject_code, subjectName: subject.subject_name }}
+                        className="grid h-8 w-8 place-items-center rounded-lg transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-500/10"
+                        aria-label="Mövzular"
+                        title="Mövzular"
+                      >
+                        <ListAltIcon fontSize="small" />
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteSubject(subject.subject_code, subject.subject_name)}
+                        className="grid h-8 w-8 place-items-center rounded-lg opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
+                        aria-label="Sil"
+                        title="Sil"
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() =>
+                      navigate("/specialty-details/subjects/new", {
+                        state: { specialtyCode, specialtyName },
+                      })
+                    }
+                    className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600"
+                  >
+                    <AddIcon sx={{ fontSize: 18 }} />
+                    Fənn əlavə et
+                  </button>
+                </div>
+              </>
+            ) : subjectsNoContent ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand-200 bg-brand-50/50 p-10 text-center dark:border-brand-500/30 dark:bg-brand-500/[0.05]">
+                <SchoolIcon className="mb-3 text-brand-500" sx={{ fontSize: 52 }} />
+                <h3 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
+                  Kurikulum və Fənlər
+                </h3>
+                <p className="mb-6 max-w-sm text-sm text-gray-500 dark:text-gray-400">
+                  Bu proqramda hələ fənn yoxdur. İlk fənni əlavə edərək kurikulumu qurun.
+                </p>
+                <button
+                  onClick={() =>
+                    navigate("/specialty-details/subjects/new", {
+                      state: { specialtyCode, specialtyName },
+                    })
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-6 py-3 font-medium text-white transition-colors hover:bg-brand-600"
+                >
+                  <AddIcon sx={{ fontSize: 18 }} />
+                  Fənn əlavə et
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

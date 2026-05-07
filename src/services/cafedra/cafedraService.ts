@@ -7,6 +7,12 @@ export interface Cafedra {
     cafedra_name: string;
 }
 
+export interface CafedraPayload {
+    faculty_code: string;
+    cafedra_code: string;
+    cafedra_name: string;
+}
+
 // get all cafedras for language az
 
 export const getCafedras = async () => {
@@ -26,6 +32,18 @@ export const getCafedras = async () => {
         return "ERROR";
     }
 }
+
+export const addCafedra = async (payload: CafedraPayload) => {
+    try {
+        const response = await apiClient.post("/api/cafedra", payload);
+        if (response.data.statusCode === 201) return "SUCCESS";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "FACULTY_NOT_FOUND";
+        if (e?.response?.status === 409) return "CONFLICT";
+        return "ERROR";
+    }
+};
 
 export const getCafedrasByFaculty = async (
     faculty_code: string,

@@ -7,6 +7,15 @@ import Input from '../form/input/InputField';
 import { RootState } from '../../redux/store';
 import { useLocation, useNavigate } from 'react-router';
 import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CategoryIcon from '@mui/icons-material/Category';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
+import DescriptionIcon from '@mui/icons-material/Description';
+import StarsIcon from '@mui/icons-material/Stars';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { Clo, getCloBySubjectCode } from '../../services/clo/clo';
 import { deleteCurricula, getSubjectDetails, updateCurricula, SubjectDetails } from '../../services/curricula/curricula';
 
@@ -33,6 +42,7 @@ export default function SubjectDeails() {
     useEffect(() => {
         getSubjectDetails(subjectCode)
             .then((details) => {
+                if (!details || typeof details !== "object") return;
                 setSubjectDetails(details);
                 setSubjectName(details.subject_name ?? "");
                 setSubjectDescription(details.subject_description ?? "");
@@ -42,7 +52,13 @@ export default function SubjectDeails() {
                 setStatus(details.status !== undefined ? String(details.status) : "");
             });
         getCloBySubjectCode(subjectCode)
-            .then(setClos)
+            .then((result) => {
+                if (Array.isArray(result)) {
+                    setClos(result);
+                } else {
+                    setClos([]);
+                }
+            })
     }, [subjectCode]);
 
 
@@ -155,10 +171,16 @@ export default function SubjectDeails() {
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
                     ) : (
-                        <Input
-                            value={subjectName}
-                            onChange={e => setSubjectName(e.target.value)}
-                        />
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 dark:text-gray-500">
+                                <MenuBookIcon sx={{ fontSize: 18 }} />
+                            </span>
+                            <Input
+                                value={subjectName}
+                                onChange={e => setSubjectName(e.target.value)}
+                                className="!pl-10"
+                            />
+                        </div>
                     )}
                 </div>
                 <div style={{
@@ -168,7 +190,12 @@ export default function SubjectDeails() {
                         Fənn kodu
                     </Label>
                     {/* Subject code is always known, so no skeleton needed */}
-                    <Input placeholder='Fənn kodu' value={subjectCode} readOnly />
+                    <div className="relative">
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 dark:text-gray-500">
+                            <QrCode2Icon sx={{ fontSize: 18 }} />
+                        </span>
+                        <Input placeholder='Fənn kodu' value={subjectCode} readOnly className="!pl-10" />
+                    </div>
                 </div>
             </div>
             <div
@@ -219,11 +246,17 @@ export default function SubjectDeails() {
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
                     ) : (
-                        <Input
-                            placeholder='Fənn deskripsiyası'
-                            value={subjectDescription}
-                            onChange={e => setSubjectDescription(e.target.value)}
-                        />
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 dark:text-gray-500">
+                                <DescriptionIcon sx={{ fontSize: 18 }} />
+                            </span>
+                            <Input
+                                placeholder='Fənn deskripsiyası'
+                                value={subjectDescription}
+                                onChange={e => setSubjectDescription(e.target.value)}
+                                className="!pl-10"
+                            />
+                        </div>
                     )}
                 </div>
                 <div style={{
@@ -235,12 +268,18 @@ export default function SubjectDeails() {
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
                     ) : (
-                        <Input
-                            placeholder='Kredit'
-                            value={credit}
-                            onChange={e => setCredit(e.target.value)}
-                            type="number"
-                        />
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 dark:text-gray-500">
+                                <StarsIcon sx={{ fontSize: 18 }} />
+                            </span>
+                            <Input
+                                placeholder='Kredit'
+                                value={credit}
+                                onChange={e => setCredit(e.target.value)}
+                                type="number"
+                                className="!pl-10"
+                            />
+                        </div>
                     )}
                 </div>
             </div>
@@ -254,7 +293,12 @@ export default function SubjectDeails() {
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
                     ) : (
-                        <Input value={`Tədris ili: ${subjectDetails.year}`} />
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 dark:text-gray-500">
+                                <EventNoteIcon sx={{ fontSize: 18 }} />
+                            </span>
+                            <Input value={`Tədris ili: ${subjectDetails.year}`} className="!pl-10" />
+                        </div>
                     )}
                 </div>
                 <div style={{
@@ -266,14 +310,22 @@ export default function SubjectDeails() {
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
                     ) : (
-                        <select
-                            value={Number(semester)}
-                            onChange={e => setSemester(e.target.value)}
-                            className="w-full h-10 rounded border border-gray-300 px-3"
-                        >
-                            <option value={1}>Yaz semestri</option>
-                            <option value={2}>Payız semestri</option>
-                        </select>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                                <CalendarMonthIcon sx={{ fontSize: 18 }} />
+                            </span>
+                            <select
+                                value={Number(semester)}
+                                onChange={e => setSemester(e.target.value)}
+                                className="h-10 w-full appearance-none rounded border border-gray-300 bg-white pl-10 pr-9 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                            >
+                                <option value={1}>Yaz semestri</option>
+                                <option value={2}>Payız semestri</option>
+                            </select>
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                                <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />
+                            </span>
+                        </div>
                     )}
                 </div>
             </div>
@@ -287,12 +339,18 @@ export default function SubjectDeails() {
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
                     ) : (
-                        <Input
-                            placeholder='Həftə başı saat'
-                            value={hoursPerWeek}
-                            onChange={e => setHoursPerWeek(e.target.value)}
-                            type="number"
-                        />
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 dark:text-gray-500">
+                                <AccessTimeIcon sx={{ fontSize: 18 }} />
+                            </span>
+                            <Input
+                                placeholder='Həftə başı saat'
+                                value={hoursPerWeek}
+                                onChange={e => setHoursPerWeek(e.target.value)}
+                                type="number"
+                                className="!pl-10"
+                            />
+                        </div>
                     )}
                 </div>
                 <div style={{
@@ -304,15 +362,23 @@ export default function SubjectDeails() {
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
                     ) : (
-                        <select
-                            value={Number(status)}
-                            onChange={e => setStatus(e.target.value)}
-                            className="w-full h-10 rounded border border-gray-300 px-3"
-                        >
-                            <option value={1}>Seçmə</option>
-                            <option value={2}>Məcburi</option>
-                            <option value={3}>Digər</option>
-                        </select>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                                <CategoryIcon sx={{ fontSize: 18 }} />
+                            </span>
+                            <select
+                                value={Number(status)}
+                                onChange={e => setStatus(e.target.value)}
+                                className="h-10 w-full appearance-none rounded border border-gray-300 bg-white pl-10 pr-9 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                            >
+                                <option value={1}>Seçmə</option>
+                                <option value={2}>Məcburi</option>
+                                <option value={3}>Digər</option>
+                            </select>
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                                <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />
+                            </span>
+                        </div>
                     )}
                 </div>
             </div>

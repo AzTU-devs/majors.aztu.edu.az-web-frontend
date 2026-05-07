@@ -20,8 +20,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router";
 import NewSpecCharPage from "./pages/NewSpecCharPage/NewSpecCharPage";
 import SpecialtiesPage from "./pages/SpecialtiesPage/SpecialtiesPage";
 import FacultiesPage from "./pages/FacultiesPage/FacultiesPage";
+import CafedrasPage from "./pages/CafedrasPage/CafedrasPage";
 import LiteraturesPage from "./pages/LiteraturesPage/LiteraturesPage";
-import SubjectDeails from "./components/subjectDetails/SubjectDetails";
+import SubjectDetailsPage from "./pages/SubjectDetailsPage/SubjectDetailsPage";
 import NewSpecialtyPage from "./pages/NewSpecialtyPage/NewSpecialtyPage";
 import TopicDetailsPage from "./pages/TopicDetailsPage/TopicDetailsPage";
 import NewLiteraturePage from "./pages/NewLiteraturePage/NewLiteraturePage";
@@ -47,6 +48,9 @@ export default function App() {
             {/* Faculties */}
             <Route path="/faculties" element={<FacultiesPage />} />
 
+            {/* Cafedras */}
+            <Route path="/cafedras" element={<CafedrasPage />} />
+
             {/* Specialties */}
             <Route path="/specialties" element={<SpecialtiesPage />} />
             <Route path="/specialty-details" element={<SpecialtyDetailsPage />} />
@@ -61,7 +65,7 @@ export default function App() {
             {/* Subjects */}
             <Route path="/specialty-details/subjects" element={<SubjectsPage />} />
             <Route path="/specialty-details/subjects/new" element={<NewSubjectPage />} />
-            <Route path="/specialty-details/subjects/subject-details" element={<SubjectDeails />} />
+            <Route path="/specialty-details/subjects/subject-details" element={<SubjectDetailsPage />} />
             <Route path="/specialty-details/subjects/subject-matching-table" element={<SubjectMatchingTablePage />} />
             <Route path="/specialty-details/subjects/subject-details/sillabus" element={<SubjectsSillabusPage />} />
 

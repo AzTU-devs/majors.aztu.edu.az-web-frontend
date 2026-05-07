@@ -3,6 +3,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import HomeFilledIcon from "@mui/icons-material/HomeFilled";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import ApartmentIcon from "@mui/icons-material/Apartment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -24,6 +25,7 @@ const sistemItems: NavItem[] = [
 
 const akademikItems: NavItem[] = [
   { icon: <AccountBalanceIcon />, name: "Fakültələr", path: "/faculties" },
+  { icon: <ApartmentIcon />, name: "Kafedralar", path: "/cafedras" },
   { icon: <SchoolIcon />, name: "İxtisaslar", path: "/specialties" },
   { icon: <MenuBookIcon />, name: "Ədəbiyyat", path: "/literatures" },
 ];

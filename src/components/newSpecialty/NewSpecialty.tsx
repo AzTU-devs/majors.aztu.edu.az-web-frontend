@@ -1,11 +1,13 @@
 import Swal from "sweetalert2";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Label from "../form/Label";
+import Select from "../form/Select";
 import Button from "../ui/button/Button";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import Input from "../form/input/InputField";
 import { RootState } from "../../redux/store";
+import { Cafedra, getCafedras } from "../../services/cafedra/cafedraService";
 import { addSpecialty, SpecialtyPayload } from "../../services/specialty/specialtyService";
 
 export default function NewSpecialty() {
@@ -13,6 +15,8 @@ export default function NewSpecialty() {
     const [specialtyName, setSpecialtyName] = useState("");
     const [specialtyCode, setSpecialtyCode] = useState("");
     const [loading, setLoading] = useState(false);
+    const [cafedras, setCafedras] = useState<Cafedra[]>([]);
+    const [selectedCafedra, setSelectedCafedra] = useState("");
     // const [ploText, setPloText] = useState("");
     // const [sloText, setSloText] = useState("");
     // const [gcoText, setGcoText] = useState("");
@@ -27,13 +31,47 @@ export default function NewSpecialty() {
     // const [programDescription, setProgramDescription] = useState("");
 
     const token = useSelector((state: RootState) => state.auth.token);
+    const role = useSelector((state: RootState) => state.auth.role);
     const cafedraCode = useSelector((state: RootState) => state.auth.cafedra_code);
+    const isAdmin = role === 1;
+
+    useEffect(() => {
+        if (!isAdmin) return;
+        (async () => {
+            const result = await getCafedras();
+            if (Array.isArray(result)) {
+                setCafedras(result);
+            }
+        })();
+    }, [isAdmin]);
 
     const createSpecialty = async () => {
+        const effectiveCafedraCode = isAdmin ? selectedCafedra : (cafedraCode ?? "");
+
+        if (!specialtyName.trim() || !specialtyCode.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Boş sahələr',
+                text: 'İxtisasın adı və kodunu daxil edin.',
+                confirmButtonText: 'Ok'
+            });
+            return;
+        }
+
+        if (!effectiveCafedraCode) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Kafedra seçilməyib',
+                text: 'Zəhmət olmasa kafedra seçin.',
+                confirmButtonText: 'Ok'
+            });
+            return;
+        }
+
         try {
             setLoading(true);
             const specialty: SpecialtyPayload = {
-                cafedra_code: cafedraCode ? cafedraCode : "",
+                cafedra_code: effectiveCafedraCode,
                 specialty_code: specialtyCode,
                 specialty_name: specialtyName
             }
@@ -91,6 +129,22 @@ export default function NewSpecialty() {
 
     return (
         <div>
+            {isAdmin && (
+                <div className="mb-[10px]">
+                    <Label>
+                        Kafedra
+                    </Label>
+                    <Select
+                        placeholder="Kafedra seçin"
+                        defaultValue={selectedCafedra}
+                        onChange={(value) => setSelectedCafedra(value)}
+                        options={cafedras.map((c) => ({
+                            value: c.cafedra_code,
+                            label: c.cafedra_name,
+                        }))}
+                    />
+                </div>
+            )}
             <div className="flex justify-between items-center w-full">
                 <div style={{
                     width: "calc((100% / 2) - 20px)"
