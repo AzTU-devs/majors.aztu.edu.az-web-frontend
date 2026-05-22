@@ -38,7 +38,7 @@ export default function SignUpForm() {
   const token = useSelector((state: RootState) => state.auth.token);
 
   useEffect(() => {
-    getFaculties(token)
+    getFaculties()
       .then(setFaculties)
       .finally(() => {
         setLoading(false);
