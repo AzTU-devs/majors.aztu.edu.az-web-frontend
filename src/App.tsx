@@ -14,6 +14,8 @@ import NewCloPage from "./pages/NewCloPage/NewCloPage";
 import SubjectsPage from "./pages/SubjectsPage/SubjectsPage";
 import NewTopicPage from "./pages/NewTopicPage/NewTopicPage";
 import RequireAuth from "./components/auth/RequireAuth";
+import RequireRole from "./components/auth/RequireRole";
+import UsersPage from "./pages/UsersPage/UsersPage";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import NewSubjectPage from "./pages/NewSubjectPage/NewSubjectPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
@@ -45,11 +47,17 @@ export default function App() {
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
 
-            {/* Faculties */}
-            <Route path="/faculties" element={<FacultiesPage />} />
+            {/* Admin-only routes (role 1) */}
+            <Route element={<RequireRole allowedRoles={[1]} />}>
+              {/* User management & approval */}
+              <Route path="/users" element={<UsersPage />} />
 
-            {/* Cafedras */}
-            <Route path="/cafedras" element={<CafedrasPage />} />
+              {/* Faculties */}
+              <Route path="/faculties" element={<FacultiesPage />} />
+
+              {/* Cafedras */}
+              <Route path="/cafedras" element={<CafedrasPage />} />
+            </Route>
 
             {/* Specialties */}
             <Route path="/specialties" element={<SpecialtiesPage />} />

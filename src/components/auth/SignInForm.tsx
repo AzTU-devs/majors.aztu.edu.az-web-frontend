@@ -36,6 +36,12 @@ export default function SignInForm() {
       if (typeof result === "object") {
         dispatch(loginSuccess(result));
         navigate("/");
+      } else if (result === "NOT_APPROVED") {
+        Swal.fire(
+          "Hesab təsdiq gözləyir",
+          "Hesabınız hələ administrator tərəfindən təsdiqlənməyib. Təsdiqdən sonra daxil ola biləcəksiniz.",
+          "info"
+        ).then(() => setLoading(false));
       } else if (result === "UNAUTHORIZED") {
         Swal.fire("Xəta!", "Fin kod və ya şifrə yanlışdır.", "error").then(() =>
           setLoading(false)

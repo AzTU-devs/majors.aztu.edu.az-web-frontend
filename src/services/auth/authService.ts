@@ -26,12 +26,21 @@ export const signin = async (credentials: Credentials) => {
                 "token": resposne.data.token,
                 "user": resposne.data.user
             };
+        } else if (resposne.data.statusCode === 403 || resposne.data.message === "NOT_APPROVED") {
+            return "NOT_APPROVED";
         } else if (resposne.data.statusCode === 401) {
             return "UNAUTHORIZED";
         } else {
             return "UNAUTHORIZED";
         }
-    } catch (err) {
+    } catch (err: any) {
+        // The backend returns 403 (non-2xx) for accounts pending approval.
+        if (err?.response?.status === 403 || err?.response?.data?.message === "NOT_APPROVED") {
+            return "NOT_APPROVED";
+        }
+        if (err?.response?.status === 401) {
+            return "UNAUTHORIZED";
+        }
         return "error";
     };
 };

@@ -1,4 +1,4 @@
-import { Checkbox } from "@mui/material";
+import { Checkbox, Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -11,34 +11,44 @@ export default function SubjectMatchingTable() {
     const [plos, setPlos] = useState<Plo[]>([]);
     const { specialtyCode } = location.state || {};
     const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [loading, setLoading] = useState(true);
     const [checkedState, setCheckedState] = useState<{ [key: string]: boolean }>({});
 
     useEffect(() => {
         if (!specialtyCode) return;
 
         const fetchData = async () => {
-            const plosData = await getPloBySpecailty(specialtyCode);
-            setPlos(plosData);
+            setLoading(true);
+            try {
+                const plosData = await getPloBySpecailty(specialtyCode);
+                const ploList: Plo[] = Array.isArray(plosData) ? plosData : [];
+                setPlos(ploList);
 
-            const curriculaData = await getCurriculaBySpecialtyCode(specialtyCode, 0, 10);
-            if (curriculaData === "ERROR" || curriculaData === "NOT FOUND") {
-                setSubjects([]);
-            } else if (typeof curriculaData === "object") {
-                setSubjects(curriculaData.subjects);
+                const curriculaData = await getCurriculaBySpecialtyCode(specialtyCode, 0, 100);
+                if (curriculaData === "ERROR" || curriculaData === "NOT FOUND") {
+                    setSubjects([]);
+                } else if (typeof curriculaData === "object") {
+                    setSubjects(curriculaData.subjects);
 
-                // Initialize checkbox states
-                const initialState: { [key: string]: boolean } = {};
-                for (const subject of curriculaData.subjects) {
-                    for (const plo of plosData) {
-                        initialState[`${subject.subject_code}_${plo.plo_code}`] = false;
-                    }
-                    const matchedPlos = await getMatchedPlosBySubject(subject.subject_code);
-                    matchedPlos.forEach((m: any) => {
-                        const key = `${subject.subject_code}_${m.plo_code}`;
-                        initialState[key] = true;
+                    // Initialize checkbox states, then mark matched cells.
+                    const initialState: { [key: string]: boolean } = {};
+                    const matchedResults = await Promise.all(
+                        curriculaData.subjects.map((s: Subject) =>
+                            getMatchedPlosBySubject(s.subject_code)
+                        )
+                    );
+                    curriculaData.subjects.forEach((subject: Subject, i: number) => {
+                        for (const plo of ploList) {
+                            initialState[`${subject.subject_code}_${plo.plo_code}`] = false;
+                        }
+                        matchedResults[i].forEach((m: any) => {
+                            initialState[`${subject.subject_code}_${m.plo_code}`] = true;
+                        });
                     });
+                    setCheckedState(initialState);
                 }
-                setCheckedState(initialState);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -58,44 +68,115 @@ export default function SubjectMatchingTable() {
             setCheckedState(prev => ({ ...prev, [key]: !newState }));
             Swal.fire({
                 icon: "error",
-                title: "Error",
-                text: "Failed to save match",
+                title: "Xəta",
+                text: "Uyğunluq yadda saxlanıla bilmədi.",
             });
         }
     };
 
+    const ploLabel = (plo: Plo, index: number) => plo.plo_code || `PLO${index + 1}`;
+
+    if (loading) {
+        return (
+            <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} variant="rounded" height={48} />
+                ))}
+            </div>
+        );
+    }
+
+    if (plos.length === 0) {
+        return (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 py-12 text-center text-sm text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
+                Bu ixtisas üçün proqram təlim nəticəsi (PLO) əlavə edilməyib.
+            </div>
+        );
+    }
+
+    if (subjects.length === 0) {
+        return (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 py-12 text-center text-sm text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
+                Bu ixtisas üçün fənn tapılmadı.
+            </div>
+        );
+    }
+
     return (
-        <div>
-            <table className="min-w-full border border-gray-300 rounded-lg overflow-hidden shadow-sm mt-6">
-                <thead>
-                    <tr className="text-left">
-                        <th className="border px-4 py-2 text-gray-800 font-semibold"></th>
-                        {plos.map((plo, index) => (
-                            <th key={index} className="border px-4 py-2 text-gray-800 font-semibold">
-                                {plo.plo_content}
+        <div className="space-y-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+                Hər fənni uyğun gələn proqram təlim nəticələri (PLO) ilə işarələyin. Dəyişikliklər avtomatik yadda saxlanılır.
+            </p>
+
+            <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm dark:border-white/10">
+                <table className="min-w-full border-collapse text-sm">
+                    <thead>
+                        <tr>
+                            <th className="sticky left-0 z-10 min-w-[240px] border-b border-r border-white/15 bg-brand-600 px-4 py-3 text-left font-semibold text-white">
+                                Fənn
                             </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {subjects.map((subject, index) => (
-                        <tr key={index} className="border-t hover:bg-gray-100 transition-colors">
-                            <td className="border px-4 py-2 text-gray-800">{subject.subject_name}</td>
-                            {plos.map((plo, ploIndex) => {
-                                const key = `${subject.subject_code}_${plo.plo_code}`;
-                                return (
-                                    <td key={ploIndex} className="border px-4 py-2 text-center">
-                                        <Checkbox
-                                            checked={!!checkedState[key]}
-                                            onChange={() => handleCheckboxChange(subject.subject_code, plo.plo_code)}
-                                        />
-                                    </td>
-                                );
-                            })}
+                            {plos.map((plo, index) => (
+                                <th
+                                    key={plo.plo_code ?? index}
+                                    title={plo.plo_content}
+                                    className="whitespace-nowrap border-b border-l border-white/15 bg-brand-600 px-3 py-3 text-center font-semibold text-white"
+                                >
+                                    {ploLabel(plo, index)}
+                                </th>
+                            ))}
                         </tr>
+                    </thead>
+                    <tbody>
+                        {subjects.map((subject, index) => (
+                            <tr
+                                key={subject.subject_code ?? index}
+                                className="odd:bg-white even:bg-gray-50 hover:bg-brand-50/50 dark:odd:bg-gray-900 dark:even:bg-white/[0.03] dark:hover:bg-white/5"
+                            >
+                                <td className="sticky left-0 z-10 min-w-[240px] border-t border-r border-gray-200 bg-inherit px-4 py-2.5 font-medium text-gray-800 dark:border-white/10 dark:text-gray-100">
+                                    {subject.subject_name}
+                                </td>
+                                {plos.map((plo, ploIndex) => {
+                                    const key = `${subject.subject_code}_${plo.plo_code}`;
+                                    return (
+                                        <td
+                                            key={ploIndex}
+                                            className="border-t border-l border-gray-200 px-3 py-2.5 text-center dark:border-white/10"
+                                        >
+                                            <Checkbox
+                                                size="small"
+                                                checked={!!checkedState[key]}
+                                                onChange={() => handleCheckboxChange(subject.subject_code, plo.plo_code)}
+                                            />
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Legend: PLO code → full content */}
+            <div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    İşarələmə
+                </p>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    {plos.map((plo, index) => (
+                        <div
+                            key={plo.plo_code ?? index}
+                            className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-gray-900"
+                        >
+                            <span className="flex-shrink-0 rounded-md bg-brand-50 px-2 py-1 text-xs font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+                                {ploLabel(plo, index)}
+                            </span>
+                            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                                {plo.plo_content}
+                            </p>
+                        </div>
                     ))}
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
     );
 }

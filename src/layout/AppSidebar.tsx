@@ -4,28 +4,35 @@ import HomeFilledIcon from "@mui/icons-material/HomeFilled";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ApartmentIcon from "@mui/icons-material/Apartment";
-import { useCallback, useEffect, useRef, useState } from "react";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 
 import { ChevronDownIcon, HorizontaLDots, UserCircleIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
+// Role values: 1 = admin/dev, 2 = kafedra müdiri (department head).
+const ADMIN_ONLY = [1];
+
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
+  // When set, only these roles may see the item. Undefined = visible to all.
+  roles?: number[];
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
 const sistemItems: NavItem[] = [
   { icon: <HomeFilledIcon />, name: "Ana Səhifə", path: "/" },
   { icon: <UserCircleIcon />, name: "Profil", path: "/profile" },
+  { icon: <PeopleAltIcon />, name: "İstifadəçilər", path: "/users", roles: ADMIN_ONLY },
 ];
 
 const akademikItems: NavItem[] = [
-  { icon: <AccountBalanceIcon />, name: "Fakültələr", path: "/faculties" },
-  { icon: <ApartmentIcon />, name: "Kafedralar", path: "/cafedras" },
+  { icon: <AccountBalanceIcon />, name: "Fakültələr", path: "/faculties", roles: ADMIN_ONLY },
+  { icon: <ApartmentIcon />, name: "Kafedralar", path: "/cafedras", roles: ADMIN_ONLY },
   { icon: <SchoolIcon />, name: "İxtisaslar", path: "/specialties" },
   { icon: <MenuBookIcon />, name: "Ədəbiyyat", path: "/literatures" },
 ];
@@ -42,12 +49,26 @@ const AppSidebar: React.FC = () => {
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Filter menu items by the signed-in user's role.
+  const canSee = useCallback(
+    (item: NavItem) => !item.roles || (auth.role != null && item.roles.includes(auth.role)),
+    [auth.role]
+  );
+  const visibleSistemItems = useMemo(
+    () => sistemItems.filter(canSee),
+    [canSee]
+  );
+  const visibleAkademikItems = useMemo(
+    () => akademikItems.filter(canSee),
+    [canSee]
+  );
+
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
 
   useEffect(() => {
     let submenuMatched = false;
     (["sistem", "akademik"] as const).forEach((menuType) => {
-      const items = menuType === "sistem" ? sistemItems : akademikItems;
+      const items = menuType === "sistem" ? visibleSistemItems : visibleAkademikItems;
       items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
@@ -60,7 +81,7 @@ const AppSidebar: React.FC = () => {
       });
     });
     if (!submenuMatched) setOpenSubmenu(null);
-  }, [location, isActive]);
+  }, [location, isActive, visibleSistemItems, visibleAkademikItems]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -231,7 +252,7 @@ const AppSidebar: React.FC = () => {
             >
               {showLabel ? "Sistem" : <HorizontaLDots className="size-5" />}
             </h2>
-            {renderMenuItems(sistemItems, "sistem")}
+            {renderMenuItems(visibleSistemItems, "sistem")}
           </div>
 
           {/* Akademik group */}
@@ -243,7 +264,7 @@ const AppSidebar: React.FC = () => {
             >
               {showLabel ? "Akademik" : <HorizontaLDots className="size-5" />}
             </h2>
-            {renderMenuItems(akademikItems, "akademik")}
+            {renderMenuItems(visibleAkademikItems, "akademik")}
           </div>
         </nav>
 
