@@ -490,6 +490,16 @@ export default function SpecialtyDetails() {
           <div className="space-y-3">
             {competency.length > 0 ? (
               <>
+                <div className="flex justify-end">
+                  <Link
+                    to="/specialty-details/competency-matching-table"
+                    state={{ specialtyCode, specialtyName }}
+                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:bg-gray-800"
+                  >
+                    <TableChartIcon sx={{ fontSize: 16 }} />
+                    Səriştə uyğunluq cədvəli
+                  </Link>
+                </div>
                 {competency.map((item, index) => (
                   <div
                     key={index}
@@ -498,9 +508,20 @@ export default function SpecialtyDetails() {
                     <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
                       {index + 1}
                     </span>
-                    <p className="flex-1 pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                      {item.competency_content}
-                    </p>
+                    <div className="flex-1 pt-1">
+                      <span
+                        className={`mb-1 inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${
+                          item.competency_type === 1
+                            ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                            : "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
+                        }`}
+                      >
+                        {item.competency_type === 1 ? "Peşə Səriştələri" : "İxtisas Səriştələri"}
+                      </span>
+                      <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                        {item.competency_content}
+                      </p>
+                    </div>
                     <button
                       onClick={async () => {
                         if (!(await confirmDelete(item.competency_code))) return;

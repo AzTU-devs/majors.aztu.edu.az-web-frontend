@@ -16,6 +16,7 @@ import NewTopicPage from "./pages/NewTopicPage/NewTopicPage";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireRole from "./components/auth/RequireRole";
 import UsersPage from "./pages/UsersPage/UsersPage";
+import CompetencyMatchingTablePage from "./pages/CompetencyMatchingTablePage/CompetencyMatchingTablePage";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import NewSubjectPage from "./pages/NewSubjectPage/NewSubjectPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
@@ -97,6 +98,7 @@ export default function App() {
 
             {/* Competency */}
             <Route path="/specialty-details/new-competency" element={<NewCompetencyPage />} />
+            <Route path="/specialty-details/competency-matching-table" element={<CompetencyMatchingTablePage />} />
 
             {/* Literatures */}
             <Route path="/literatures" element={<LiteraturesPage />} />

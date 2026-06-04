@@ -1,12 +1,18 @@
 import Swal from "sweetalert2";
 import { useState } from "react";
 import Label from "../form/Label";
+import Select from "../form/Select";
 import Button from "../ui/button/Button";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import TextArea from "../form/input/TextArea";
 import { useLocation, useNavigate } from "react-router";
 import { addCompetency, CompetencyPayload } from "../../services/competency/competencyService";
+
+const typeOptions = [
+    { value: "1", label: "Peşə Səriştələri" },
+    { value: "2", label: "İxtisas Səriştələri" },
+];
 
 export default function NewCompetency() {
     const location = useLocation();
@@ -16,13 +22,15 @@ export default function NewCompetency() {
     const [loading, setLoading] = useState(false);
     const token = useSelector((state: RootState) => state.auth.token);
     const [competencyContent, setCompetencyContent] = useState("");
+    const [competencyType, setCompetencyType] = useState<number>(2);
 
     const createSpecialtyChar = async () => {
         try {
             setLoading(true);
             const competencyPaylaod: CompetencyPayload = {
                 specialty_code: specialtyCode,
-                competency_content: competencyContent
+                competency_content: competencyContent,
+                competency_type: competencyType
             }
             const result = await addCompetency(competencyPaylaod, token ? token : "");
 
@@ -71,6 +79,14 @@ export default function NewCompetency() {
         <div>
             <div className="mb-[20px]">
                 <Label>{specialtyName} ({specialtyCode})</Label>
+            </div>
+            <div className="mb-[15px]">
+                <Label>Səriştə növü</Label>
+                <Select
+                    options={typeOptions}
+                    defaultValue="2"
+                    onChange={(value) => setCompetencyType(Number(value))}
+                />
             </div>
             <Label>
                 Səriştə

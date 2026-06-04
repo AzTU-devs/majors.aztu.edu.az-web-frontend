@@ -2,10 +2,12 @@ import apiClient from "../../util/apiClient";
 
 const lang_code = "az";
 
+// competency_type: 1 = Peşə (Job), 2 = İxtisas (Specialty)
 export interface Competency {
     id: number;
     specialty_code: string;
     competency_code: string;
+    competency_type: number;
     language_code: string;
     competency_content: string;
 }
@@ -13,12 +15,18 @@ export interface Competency {
 export interface CompetencyPayload {
     specialty_code: string;
     competency_content: string;
+    competency_type: number;
 }
 
-export const getCompetencyBySpecialty = async (specialty_code: string, token: string) => {
+export const getCompetencyBySpecialty = async (
+    specialty_code: string,
+    token: string,
+    competency_type?: number
+) => {
     try {
+        const typeQuery = competency_type ? `&type=${competency_type}` : "";
         const response = await apiClient.get(
-            `/api/competency/${specialty_code}?lang=${lang_code}`,
+            `/api/competency/${specialty_code}?lang=${lang_code}${typeQuery}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
