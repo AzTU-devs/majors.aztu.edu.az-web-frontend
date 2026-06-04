@@ -1,14 +1,14 @@
-import { Link } from "react-router";
 import Stack from '@mui/material/Stack';
 import { Skeleton } from "@mui/material";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import Pagination from '@mui/material/Pagination';
 import { Topic, getTopics } from "../../services/topic/topic";
-import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function Topics() {
     const location = useLocation();
+    const navigate = useNavigate();
     const [end, setEnd] = useState<number>(6);
     const [loading, setLoading] = useState(false);
     const [start, setStart] = useState<number>(0);
@@ -49,25 +49,46 @@ export default function Topics() {
                         </div>
                     ))
                 ) : (
-                    topics.map((topic, index) => (
-                        <div
-                            key={index}
-                            className="w-[48%] m-2 p-4 flex justify-between items-center 
-                            bg-blue-500 text-white border-2 border-blue-500 rounded-[15px]
-                            transition-colors duration-300
-                            hover:bg-white hover:text-blue-500
-                            cursor-pointer"
-                        >
-                            <Link to={`${topic.topic_url}`} state={{ topicName: topic.topic_name, topicUrl: topic.topic_url, topicType: topic.topic_type, topicDesc: topic.topic_desc, topicResult: topic.topic_result, topicCode: topic.topic_code }} className="flex justify-between w-full">
+                    topics.map((topic, index) => {
+                        const goToEdit = () =>
+                            navigate("/specialty-details/subjects/topics/details", {
+                                state: {
+                                    topicName: topic.topic_name,
+                                    topicUrl: topic.topic_url,
+                                    topicType: topic.topic_type,
+                                    topicDesc: topic.topic_desc,
+                                    topicResult: topic.topic_result,
+                                    topicCode: topic.topic_code,
+                                },
+                            });
+                        return (
+                            <div
+                                key={index}
+                                onClick={goToEdit}
+                                className="w-[48%] m-2 p-4 flex justify-between items-center gap-3
+                                bg-blue-500 text-white border-2 border-blue-500 rounded-[15px]
+                                transition-colors duration-300
+                                hover:bg-white hover:text-blue-500
+                                cursor-pointer"
+                            >
                                 <div>
-                                    {topic.topic_name} ({topic.topic_type === 1 ? "Lecture" : topic.topic_type === 2 ? "Məşğələ" : topic.topic_type === 3 ? "Laboratoriya" : topic.topic_type === 4 ? "Sərbəsi iş" : "Mövcud deyil"})
+                                    {topic.topic_name} ({topic.topic_type === 1 ? "Mühazirə" : topic.topic_type === 2 ? "Məşğələ" : topic.topic_type === 3 ? "Laboratoriya" : topic.topic_type === 4 ? "Sərbəst iş" : "Mövcud deyil"})
                                 </div>
-                                <div>
-                                    <ArrowOutwardIcon sx={{ fontSize: 25 }} />
-                                </div>
-                            </Link>
-                        </div>
-                    ))
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        goToEdit();
+                                    }}
+                                    title="Düzəliş et"
+                                    className="flex items-center gap-1 rounded-[10px] bg-white/20 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-white hover:text-blue-500"
+                                >
+                                    <EditIcon sx={{ fontSize: 18 }} />
+                                    Düzəliş et
+                                </button>
+                            </div>
+                        );
+                    })
                 )}
                 {!loading && topics.length === 0 && (
                     <div className="flex justify-center items-center w-full">
