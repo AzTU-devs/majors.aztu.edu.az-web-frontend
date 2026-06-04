@@ -17,7 +17,16 @@ import StarsIcon from '@mui/icons-material/Stars';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { Clo, getCloBySubjectCode } from '../../services/clo/clo';
-import { deleteCurricula, getSubjectDetails, updateCurricula, SubjectDetails } from '../../services/curricula/curricula';
+import { deleteCurricula, getSubjectDetails, updateCurricula, SubjectDetails, AssessmentRow } from '../../services/curricula/curricula';
+import {
+    FORM_OF_EDUCATION_OPTIONS,
+    LANGUAGE_OPTIONS,
+    parseTeachingMethods,
+    DEFAULT_ASSESSMENT,
+} from '../../constants/subjectMeta';
+import TeachingMethodsPicker from '../subjectMeta/TeachingMethodsPicker';
+import AssessmentEditor from '../subjectMeta/AssessmentEditor';
+import TextArea from '../form/input/TextArea';
 
 export default function SubjectDeails() {
     const location = useLocation();
@@ -34,6 +43,11 @@ export default function SubjectDeails() {
     const [semester, setSemester] = useState('');
     const [hoursPerWeek, setHoursPerWeek] = useState('');
     const [status, setStatus] = useState('');
+    const [formOfEducation, setFormOfEducation] = useState('');
+    const [languageOfInstruction, setLanguageOfInstruction] = useState('');
+    const [inClassHours, setInClassHours] = useState('');
+    const [teachingMethods, setTeachingMethods] = useState<string[]>([]);
+    const [assessment, setAssessment] = useState<AssessmentRow[]>([]);
     const [saveLoading, setSaveLoading] = useState(false);
     const [clos, setClos] = useState<Clo[]>([]);
 
@@ -50,6 +64,11 @@ export default function SubjectDeails() {
                 setSemester(details.semester !== undefined ? String(details.semester) : "");
                 setHoursPerWeek(details.hours_per_week !== undefined ? String(details.hours_per_week) : "");
                 setStatus(details.status !== undefined ? String(details.status) : "");
+                setFormOfEducation(details.form_of_education ? String(details.form_of_education) : "");
+                setLanguageOfInstruction(details.language_of_instruction ? String(details.language_of_instruction) : "");
+                setInClassHours(details.in_class_hours ?? "");
+                setTeachingMethods(parseTeachingMethods(details.teaching_methods));
+                setAssessment(Array.isArray(details.assessment) && details.assessment.length > 0 ? details.assessment : DEFAULT_ASSESSMENT);
             });
         getCloBySubjectCode(subjectCode)
             .then((result) => {
@@ -134,6 +153,25 @@ export default function SubjectDeails() {
             const statusNum = Number(status);
             if (!isNaN(statusNum) && statusNum !== subjectDetails?.status) {
                 updateData.status = statusNum;
+            }
+            const formNum = Number(formOfEducation);
+            if (formOfEducation !== "" && !isNaN(formNum) && formNum !== subjectDetails?.form_of_education) {
+                updateData.form_of_education = formNum;
+            }
+            const langNum = Number(languageOfInstruction);
+            if (languageOfInstruction !== "" && !isNaN(langNum) && langNum !== subjectDetails?.language_of_instruction) {
+                updateData.language_of_instruction = langNum;
+            }
+            if (inClassHours !== (subjectDetails?.in_class_hours ?? "")) {
+                updateData.in_class_hours = inClassHours;
+            }
+            const methodsStr = teachingMethods.join(",");
+            if (methodsStr !== (subjectDetails?.teaching_methods ?? "")) {
+                updateData.teaching_methods = methodsStr;
+            }
+            const assessmentStr = JSON.stringify(assessment);
+            if (assessmentStr !== JSON.stringify(subjectDetails?.assessment ?? [])) {
+                updateData.assessment = assessmentStr;
             }
 
             if (Object.keys(updateData).length === 0) {
@@ -382,6 +420,62 @@ export default function SubjectDeails() {
                     )}
                 </div>
             </div>
+            <div className="flex justify-between items-center w-full mt-[15px]">
+                <div style={{ width: "calc((100% / 2) - 20px)" }}>
+                    <Label>Təhsil forması</Label>
+                    {isLoading ? (
+                        <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
+                    ) : (
+                        <select
+                            value={formOfEducation}
+                            onChange={e => setFormOfEducation(e.target.value)}
+                            className="h-10 w-full appearance-none rounded border border-gray-300 bg-white px-3 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                        >
+                            <option value="">Seçin</option>
+                            {FORM_OF_EDUCATION_OPTIONS.map(o => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+                <div style={{ width: "calc((100% / 2) - 20px)" }}>
+                    <Label>Tədris dili</Label>
+                    {isLoading ? (
+                        <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
+                    ) : (
+                        <select
+                            value={languageOfInstruction}
+                            onChange={e => setLanguageOfInstruction(e.target.value)}
+                            className="h-10 w-full appearance-none rounded border border-gray-300 bg-white px-3 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                        >
+                            <option value="">Seçin</option>
+                            {LANGUAGE_OPTIONS.map(o => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+            </div>
+
+            <div className="w-full mt-[15px]">
+                <Label>Auditoriyadaxili saatlar</Label>
+                <TextArea
+                    placeholder="a) XX saat - mühazirə b) XX saat - seminar və s."
+                    value={inClassHours}
+                    onChange={(value) => setInClassHours(value)}
+                />
+            </div>
+
+            <div className="w-full mt-[15px]">
+                <Label>Tədris metodları</Label>
+                <TeachingMethodsPicker selected={teachingMethods} onChange={setTeachingMethods} />
+            </div>
+
+            <div className="w-full mt-[15px]">
+                <Label>Qiymətləndirmə haqqında məlumat</Label>
+                <AssessmentEditor rows={assessment} onChange={setAssessment} />
+            </div>
+
             <div className='mt-[20px]'>
                 <Label>Təlim nəticələri</Label>
                 {!clos || clos.length === 0 ? (

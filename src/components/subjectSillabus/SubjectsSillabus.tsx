@@ -8,6 +8,12 @@ import { SubjectDetails, getSubjectDetails } from "../../services/curricula/curr
 import { getLiteratures, Literature } from "../../services/literature/LiteratureService";
 import { Topic, getTopics } from "../../services/topic/topic";
 import { Tlo, getTloByTopicCode } from "../../services/tlo/tloService";
+import {
+    formOfEducationLabel,
+    languageLabel,
+    parseTeachingMethods,
+    teachingMethodLabel,
+} from "../../constants/subjectMeta";
 
 const semesterLabel = (s?: number) =>
     s === 1 ? "Yaz semestri" : s === 2 ? "Payız semestri" : "—";
@@ -134,6 +140,34 @@ export default function SubjectsSillabus() {
                             <td className={labelCell}>Fənnin tipi</td>
                             <td className={cell}>{statusLabel(details?.status)}</td>
                         </tr>
+                        <tr>
+                            <td className={labelCell}>Təhsil forması</td>
+                            <td className={cell}>{formOfEducationLabel(details?.form_of_education)}</td>
+                        </tr>
+                        <tr>
+                            <td className={labelCell}>Tədris dili</td>
+                            <td className={cell}>{languageLabel(details?.language_of_instruction)}</td>
+                        </tr>
+                        {details?.in_class_hours && (
+                            <tr>
+                                <td className={labelCell}>Auditoriyadaxili saatlar</td>
+                                <td className={`${cell} whitespace-pre-line`}>{details.in_class_hours}</td>
+                            </tr>
+                        )}
+                        <tr>
+                            <td className={labelCell}>Tədris metodları</td>
+                            <td className={cell}>
+                                {parseTeachingMethods(details?.teaching_methods).length === 0 ? (
+                                    <span className="text-gray-400">Əlavə edilməyib</span>
+                                ) : (
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        {parseTeachingMethods(details?.teaching_methods).map((k) => (
+                                            <li key={k}>{teachingMethodLabel(k)}</li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </td>
+                        </tr>
                         {details?.subject_description && (
                             <tr>
                                 <td className={labelCell}>Təsvir</td>
@@ -221,6 +255,37 @@ export default function SubjectsSillabus() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Assessment */}
+            {details?.assessment && details.assessment.length > 0 && (
+                <div className="overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+                    <table className="w-full border-collapse text-left text-sm text-gray-800 dark:text-gray-200">
+                        <thead>
+                            <tr>
+                                <td colSpan={4} className={`${cell} bg-gray-100 dark:bg-white/10 font-semibold`}>
+                                    Qiymətləndirmə haqqında məlumat
+                                </td>
+                            </tr>
+                            <tr className="bg-gray-50 dark:bg-white/5 text-xs font-semibold">
+                                <td className={cell}>Qiymətləndirmə forması</td>
+                                <td className={cell}>Açıqlama</td>
+                                <td className={cell}>Bal</td>
+                                <td className={cell}>Uyğun FTN</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {details.assessment.map((row, i) => (
+                                <tr key={i}>
+                                    <td className={`${cell} font-medium`}>{row.form}</td>
+                                    <td className={cell}>{row.description}</td>
+                                    <td className={`${cell} whitespace-nowrap`}>{row.score}</td>
+                                    <td className={`${cell} whitespace-nowrap`}>{row.ftn}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

@@ -11,6 +11,13 @@ export interface Subject {
     credit: number
 };
 
+export interface AssessmentRow {
+    form: string;
+    description: string;
+    score: string;
+    ftn: string;
+}
+
 export interface SubjectPayload {
     specialty_code: string;
     subject_code: string;
@@ -21,6 +28,11 @@ export interface SubjectPayload {
     credit?: number;
     year: number;
     hours_per_week?: number;
+    form_of_education?: number;
+    language_of_instruction?: number;
+    in_class_hours?: string;
+    teaching_methods?: string;
+    assessment?: string;
 };
 
 export interface SubjectDetails {
@@ -32,6 +44,11 @@ export interface SubjectDetails {
     credit?: number;
     year: number;
     hours_per_week?: number;
+    form_of_education?: number | null;
+    language_of_instruction?: number | null;
+    in_class_hours?: string | null;
+    teaching_methods?: string | null;
+    assessment?: AssessmentRow[];
 };
 
 export const getCurriculaBySpecialtyCode = async (specialtyCode: string, start: number, end: number) => {

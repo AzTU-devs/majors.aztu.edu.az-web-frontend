@@ -5,7 +5,15 @@ import Select from '../form/Select';
 import Button from '../ui/button/Button';
 import { useLocation } from 'react-router';
 import Input from '../form/input/InputField';
-import { addCurricula } from '../../services/curricula/curricula';
+import TextArea from '../form/input/TextArea';
+import { addCurricula, AssessmentRow } from '../../services/curricula/curricula';
+import {
+    FORM_OF_EDUCATION_OPTIONS,
+    LANGUAGE_OPTIONS,
+    DEFAULT_ASSESSMENT,
+} from '../../constants/subjectMeta';
+import TeachingMethodsPicker from '../subjectMeta/TeachingMethodsPicker';
+import AssessmentEditor from '../subjectMeta/AssessmentEditor';
 
 export default function NewSubject() {
     const location = useLocation();
@@ -15,6 +23,11 @@ export default function NewSubject() {
     const [subjectCode, setSubjectCode] = useState("");
     const [subjectName, setSubjectName] = useState("");
     const [hoursPerWeek, setHoursPerWeek] = useState<number>();
+    const [formOfEducation, setFormOfEducation] = useState<number>(1);
+    const [languageOfInstruction, setLanguageOfInstruction] = useState<number>(1);
+    const [inClassHours, setInClassHours] = useState("");
+    const [teachingMethods, setTeachingMethods] = useState<string[]>([]);
+    const [assessment, setAssessment] = useState<AssessmentRow[]>(DEFAULT_ASSESSMENT);
     const { specialtyCode } = location.state as { specialtyCode: string };
     const { specialtyName } = location.state as { specialtyName: string };
 
@@ -91,7 +104,12 @@ export default function NewSubject() {
                 status: +selectedStatus,
                 credit: credit,
                 year: selectedYear ? selectedYear : 1,
-                hours_per_week: hoursPerWeek
+                hours_per_week: hoursPerWeek,
+                form_of_education: formOfEducation,
+                language_of_instruction: languageOfInstruction,
+                in_class_hours: inClassHours,
+                teaching_methods: teachingMethods.join(","),
+                assessment: JSON.stringify(assessment)
             }
             const result = await addCurricula(subjectPayload);
 
@@ -239,6 +257,52 @@ export default function NewSubject() {
                         }
                     />
                 </div>
+            </div>
+            <div className="flex justify-between items-center w-full">
+                <div style={{ width: "calc((100% / 2) - 20px)" }}>
+                    <Label>
+                        Təhsil forması
+                    </Label>
+                    <Select
+                        placeholder='Təhsil forması seçin'
+                        options={FORM_OF_EDUCATION_OPTIONS}
+                        defaultValue="1"
+                        onChange={(value) => setFormOfEducation(+value)}
+                    />
+                </div>
+                <div style={{ width: "calc((100% / 2) - 20px)" }}>
+                    <Label>
+                        Tədris dili
+                    </Label>
+                    <Select
+                        placeholder='Tədris dili seçin'
+                        options={LANGUAGE_OPTIONS}
+                        defaultValue="1"
+                        onChange={(value) => setLanguageOfInstruction(+value)}
+                    />
+                </div>
+            </div>
+            <div className="w-full">
+                <Label>
+                    Auditoriyadaxili saatlar
+                </Label>
+                <TextArea
+                    placeholder='a) XX saat - mühazirə b) XX saat - seminar və s.'
+                    value={inClassHours}
+                    onChange={(value) => setInClassHours(value)}
+                />
+            </div>
+            <div className="w-full">
+                <Label>
+                    Tədris metodları
+                </Label>
+                <TeachingMethodsPicker selected={teachingMethods} onChange={setTeachingMethods} />
+            </div>
+            <div className="w-full">
+                <Label>
+                    Qiymətləndirmə haqqında məlumat
+                </Label>
+                <AssessmentEditor rows={assessment} onChange={setAssessment} />
             </div>
             <div className='flex justify-end items-center'>
                 <Button disabled={loading} onClick={createSubject}>
