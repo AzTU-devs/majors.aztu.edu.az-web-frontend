@@ -34,7 +34,7 @@ const akademikItems: NavItem[] = [
   { icon: <AccountBalanceIcon />, name: "Fakültələr", path: "/faculties", roles: ADMIN_ONLY },
   { icon: <ApartmentIcon />, name: "Kafedralar", path: "/cafedras", roles: ADMIN_ONLY },
   { icon: <SchoolIcon />, name: "İxtisaslar", path: "/specialties" },
-  { icon: <MenuBookIcon />, name: "Ədəbiyyat", path: "/literatures" },
+  { icon: <MenuBookIcon />, name: "Ədəbiyyat", path: "/literatures", roles: ADMIN_ONLY },
 ];
 
 const AppSidebar: React.FC = () => {
