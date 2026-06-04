@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router";
 import Pagination from '@mui/material/Pagination';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { Subject, getCurriculaBySpecialtyCode } from "../../services/curricula/curricula";
 
 
@@ -88,13 +89,23 @@ export default function Subjects() {
                                 <Link
                                     to={"/specialty-details/subjects/topics"}
                                     state={{ subjectCode: subject.subject_code, subjectName: subject.subject_name }}
+                                    title="Mövzular"
                                 >
                                     <ArrowOutwardIcon sx={{ fontSize: 25 }} />
                                 </Link>
 
                                 <Link
+                                    to={"/specialty-details/subjects/subject-details/sillabus"}
+                                    state={{ subjectCode: subject.subject_code, subjectName: subject.subject_name }}
+                                    title="Sillabus"
+                                >
+                                    <DescriptionIcon sx={{ fontSize: 25 }} />
+                                </Link>
+
+                                <Link
                                     to={"/specialty-details/subjects/subject-details"}
                                     state={{ subjectCode: subject.subject_code, specialtyCode: specialtyCode }}
+                                    title="Detallar"
                                 >
                                     <VisibilityIcon sx={{ fontSize: 25 }} />
                                 </Link>

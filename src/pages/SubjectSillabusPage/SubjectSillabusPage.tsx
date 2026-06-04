@@ -16,7 +16,7 @@ export default function SubjectsSillabusPage() {
             />
             <PageBreadcrumb pageTitle="Fənn sillabusu " />
             <div className="space-y-6">
-                <ComponentCard title={`Fənn sillabusu ( ${subjectName}-${subjectCode} )`} isNew={true} topicState={{ subjectCode, subjectName }} path="/specialty-details/subjects/new">
+                <ComponentCard title={`Fənn sillabusu ( ${subjectName}-${subjectCode} )`}>
                     <SubjectsSillabus />
                 </ComponentCard>
             </div>
