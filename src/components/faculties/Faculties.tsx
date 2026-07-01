@@ -9,6 +9,8 @@ import {
   FacultyPayload,
   addFaculty,
   getFaculties,
+  updateFaculty,
+  deleteFaculty,
 } from "../../services/faculty/facultyService";
 
 export default function Faculties() {
@@ -58,6 +60,51 @@ export default function Faculties() {
       Swal.fire("Xəta!", "Fakültə əlavə edilə bilmədi.", "error");
     }
     setSubmitting(false);
+  };
+
+  const handleEdit = async (f: Faculty) => {
+    const { value: newName } = await Swal.fire({
+      title: "Fakültəni redaktə et",
+      input: "text",
+      inputValue: f.faculty_name,
+      inputLabel: "Fakültənin adı",
+      showCancelButton: true,
+      confirmButtonText: "Yadda saxla",
+      cancelButtonText: "Ləğv et",
+      inputValidator: (v) => (!v.trim() ? "Ad boş ola bilməz" : undefined),
+    });
+    if (!newName || newName.trim() === f.faculty_name) return;
+    const result = await updateFaculty(f.faculty_code, newName.trim());
+    if (result.status === "SUCCESS") {
+      Swal.fire("Yeniləndi", "Fakültə yeniləndi.", "success");
+      refresh();
+    } else if (result.status === "CONFLICT") {
+      Swal.fire("Xəta!", result.message || "Bu ad artıq mövcuddur.", "error");
+    } else {
+      Swal.fire("Xəta!", result.message || "Fakültə yenilənə bilmədi.", "error");
+    }
+  };
+
+  const handleDelete = async (f: Faculty) => {
+    const confirm = await Swal.fire({
+      icon: "warning",
+      title: "Silinsin?",
+      text: `"${f.faculty_name}" (${f.faculty_code}) silinəcək.`,
+      showCancelButton: true,
+      confirmButtonText: "Bəli, sil",
+      cancelButtonText: "Ləğv et",
+      confirmButtonColor: "#dc2626",
+    });
+    if (!confirm.isConfirmed) return;
+    const result = await deleteFaculty(f.faculty_code);
+    if (result.status === "SUCCESS") {
+      Swal.fire("Silindi", "Fakültə silindi.", "success");
+      refresh();
+    } else if (result.status === "CONFLICT") {
+      Swal.fire("Xəta!", result.message || "Bu fakültənin kafedraları var.", "error");
+    } else {
+      Swal.fire("Xəta!", result.message || "Fakültə silinə bilmədi.", "error");
+    }
   };
 
   const filtered = faculties.filter(
@@ -130,6 +177,20 @@ export default function Faculties() {
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">
                   {f.faculty_name}
                 </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(f)}
+                    className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+                  >
+                    Redaktə et
+                  </button>
+                  <button
+                    onClick={() => handleDelete(f)}
+                    className="rounded-lg border border-error-200 px-3 py-1 text-xs font-medium text-error-600 transition hover:bg-error-50 dark:border-error-500/30 dark:hover:bg-error-500/10"
+                  >
+                    Sil
+                  </button>
+                </div>
               </div>
             ))
           )}

@@ -45,6 +45,40 @@ export const addCafedra = async (payload: CafedraPayload) => {
     }
 };
 
+export interface CafedraMutationResult {
+    status: "SUCCESS" | "CONFLICT" | "ERROR";
+    message?: string;
+}
+
+export const updateCafedra = async (
+    cafedra_code: string,
+    payload: { cafedra_name?: string; faculty_code?: string }
+): Promise<CafedraMutationResult> => {
+    try {
+        const response = await apiClient.put(`/api/cafedra/${cafedra_code}`, payload);
+        if (response.data.statusCode === 200) return { status: "SUCCESS" };
+        return { status: "ERROR", message: response.data.message };
+    } catch (e: any) {
+        if (e?.response?.status === 409)
+            return { status: "CONFLICT", message: e.response.data?.message };
+        return { status: "ERROR", message: e?.response?.data?.message };
+    }
+};
+
+export const deleteCafedra = async (
+    cafedra_code: string
+): Promise<CafedraMutationResult> => {
+    try {
+        const response = await apiClient.delete(`/api/cafedra/${cafedra_code}`);
+        if (response.data.statusCode === 200) return { status: "SUCCESS" };
+        return { status: "ERROR", message: response.data.message };
+    } catch (e: any) {
+        if (e?.response?.status === 409)
+            return { status: "CONFLICT", message: e.response.data?.message };
+        return { status: "ERROR", message: e?.response?.data?.message };
+    }
+};
+
 export const getCafedrasByFaculty = async (
     faculty_code: string,
     token: string

@@ -11,6 +11,8 @@ import {
   CafedraPayload,
   addCafedra,
   getCafedras,
+  updateCafedra,
+  deleteCafedra,
 } from "../../services/cafedra/cafedraService";
 
 export default function Cafedras() {
@@ -74,6 +76,51 @@ export default function Cafedras() {
       Swal.fire("Xəta!", "Kafedra əlavə edilə bilmədi.", "error");
     }
     setSubmitting(false);
+  };
+
+  const handleEdit = async (c: Cafedra) => {
+    const { value: newName } = await Swal.fire({
+      title: "Kafedranı redaktə et",
+      input: "text",
+      inputValue: c.cafedra_name,
+      inputLabel: "Kafedranın adı",
+      showCancelButton: true,
+      confirmButtonText: "Yadda saxla",
+      cancelButtonText: "Ləğv et",
+      inputValidator: (v) => (!v.trim() ? "Ad boş ola bilməz" : undefined),
+    });
+    if (!newName || newName.trim() === c.cafedra_name) return;
+    const result = await updateCafedra(c.cafedra_code, { cafedra_name: newName.trim() });
+    if (result.status === "SUCCESS") {
+      Swal.fire("Yeniləndi", "Kafedra yeniləndi.", "success");
+      refresh();
+    } else if (result.status === "CONFLICT") {
+      Swal.fire("Xəta!", result.message || "Bu ad artıq mövcuddur.", "error");
+    } else {
+      Swal.fire("Xəta!", result.message || "Kafedra yenilənə bilmədi.", "error");
+    }
+  };
+
+  const handleDelete = async (c: Cafedra) => {
+    const confirm = await Swal.fire({
+      icon: "warning",
+      title: "Silinsin?",
+      text: `"${c.cafedra_name}" (${c.cafedra_code}) silinəcək.`,
+      showCancelButton: true,
+      confirmButtonText: "Bəli, sil",
+      cancelButtonText: "Ləğv et",
+      confirmButtonColor: "#dc2626",
+    });
+    if (!confirm.isConfirmed) return;
+    const result = await deleteCafedra(c.cafedra_code);
+    if (result.status === "SUCCESS") {
+      Swal.fire("Silindi", "Kafedra silindi.", "success");
+      refresh();
+    } else if (result.status === "CONFLICT") {
+      Swal.fire("Xəta!", result.message || "Bu kafedra istifadədədir.", "error");
+    } else {
+      Swal.fire("Xəta!", result.message || "Kafedra silinə bilmədi.", "error");
+    }
   };
 
   const filtered = cafedras.filter(
@@ -163,6 +210,20 @@ export default function Cafedras() {
                     Fakültə: {c.faculty_code}
                   </p>
                 )}
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(c)}
+                    className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+                  >
+                    Redaktə et
+                  </button>
+                  <button
+                    onClick={() => handleDelete(c)}
+                    className="rounded-lg border border-error-200 px-3 py-1 text-xs font-medium text-error-600 transition hover:bg-error-50 dark:border-error-500/30 dark:hover:bg-error-500/10"
+                  >
+                    Sil
+                  </button>
+                </div>
               </div>
             ))
           )}

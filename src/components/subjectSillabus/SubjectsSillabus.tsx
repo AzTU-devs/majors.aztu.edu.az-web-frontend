@@ -133,7 +133,7 @@ export default function SubjectsSillabus() {
                             <td className={cell}>{semesterLabel(details?.semester)}</td>
                         </tr>
                         <tr>
-                            <td className={labelCell}>Tədris ili</td>
+                            <td className={labelCell}>Akademik il</td>
                             <td className={cell}>{details?.year ?? "—"}</td>
                         </tr>
                         <tr>

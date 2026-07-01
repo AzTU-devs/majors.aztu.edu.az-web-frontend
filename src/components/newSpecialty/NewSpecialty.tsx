@@ -340,7 +340,7 @@ export default function NewSpecialty() {
                 }}
                 onClick={() => setIsCurriculaOpen(!isCurriculaOpen)}
             >
-                <span className="text-sm text-gray-500 dark:text-gray-400">Kurikulum Proqramı</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Kurrikulum Proqramı</span>
                 <KeyboardArrowDownIcon
                     className="text-sm text-gray-500 dark:text-gray-400"
                     style={{ transform: isCurriculaOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }}
@@ -354,7 +354,7 @@ export default function NewSpecialty() {
                         onChange={(value) => setCurriculaText(
                             value.charAt(0).toUpperCase() + value.slice(1)
                         )}
-                        placeholder="Kurikulum Proqramı Mətnini daxil edin"
+                        placeholder="Kurrikulum Proqramı Mətnini daxil edin"
                     />
                 </div>
             )} */}

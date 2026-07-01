@@ -35,3 +35,39 @@ export const addFaculty = async (payload: FacultyPayload) => {
         return "ERROR";
     }
 };
+
+export interface MutationResult {
+    status: "SUCCESS" | "CONFLICT" | "ERROR";
+    message?: string;
+}
+
+export const updateFaculty = async (
+    faculty_code: string,
+    faculty_name: string
+): Promise<MutationResult> => {
+    try {
+        const response = await apiClient.put(`/api/faculty/${faculty_code}`, {
+            faculty_name,
+        });
+        if (response.data.statusCode === 200) return { status: "SUCCESS" };
+        return { status: "ERROR", message: response.data.message };
+    } catch (e: any) {
+        if (e?.response?.status === 409)
+            return { status: "CONFLICT", message: e.response.data?.message };
+        return { status: "ERROR", message: e?.response?.data?.message };
+    }
+};
+
+export const deleteFaculty = async (
+    faculty_code: string
+): Promise<MutationResult> => {
+    try {
+        const response = await apiClient.delete(`/api/faculty/${faculty_code}`);
+        if (response.data.statusCode === 200) return { status: "SUCCESS" };
+        return { status: "ERROR", message: response.data.message };
+    } catch (e: any) {
+        if (e?.response?.status === 409)
+            return { status: "CONFLICT", message: e.response.data?.message };
+        return { status: "ERROR", message: e?.response?.data?.message };
+    }
+};

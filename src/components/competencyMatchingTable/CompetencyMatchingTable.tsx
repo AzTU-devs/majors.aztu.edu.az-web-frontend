@@ -13,7 +13,7 @@ import {
 
 const TYPE_GROUPS = [
     { type: 1, label: "Peşə Səriştələri" },
-    { type: 2, label: "İxtisas Səriştələri" },
+    { type: 2, label: "Ümumi Səriştələr" },
 ];
 
 export default function CompetencyMatchingTable() {

@@ -32,29 +32,9 @@ export default function NewSubject() {
     const { specialtyCode } = location.state as { specialtyCode: string };
     const { specialtyName } = location.state as { specialtyName: string };
 
-    // year
+    // academic year (Akademik il), free text like "2025-2026"
 
-    const yearOptions = [
-        {
-            value: "1",
-            label: "1-ci il"
-        }, {
-            value: "2",
-            label: "2-ci il"
-        }, {
-            value: "3",
-            label: "3-cü il"
-        }, {
-            value: "4",
-            label: "4-cü il"
-        }
-    ];
-
-    const [selectedYear, setSelectedYear] = useState<number>();
-
-    const handleYearChange = (value: string) => {
-        setSelectedYear(+value);
-    }
+    const [academicYear, setAcademicYear] = useState("");
 
     // status logic
 
@@ -104,7 +84,7 @@ export default function NewSubject() {
                 semester: +selectedSemester,
                 status: +selectedStatus,
                 credit: credit,
-                year: selectedYear ? selectedYear : 1,
+                year: academicYear,
                 hours_per_week: hoursPerWeek,
                 form_of_education: formOfEducation,
                 language_of_instruction: languageOfInstruction,
@@ -193,12 +173,12 @@ export default function NewSubject() {
                     width: "calc((100% / 2) - 20px)"
                 }}>
                     <Label>
-                        Tədris ili
+                        Akademik il
                     </Label>
-                    <Select
-                        placeholder='Tədris ili seçin'
-                        options={yearOptions}
-                        onChange={handleYearChange}
+                    <Input
+                        placeholder='2025-2026'
+                        value={academicYear}
+                        onChange={(e) => setAcademicYear(e.target.value)}
                     />
                 </div>
             </div>

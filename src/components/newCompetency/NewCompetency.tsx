@@ -11,7 +11,7 @@ import { addCompetency, CompetencyPayload } from "../../services/competency/comp
 
 const typeOptions = [
     { value: "1", label: "Peşə Səriştələri" },
-    { value: "2", label: "İxtisas Səriştələri" },
+    { value: "2", label: "Ümumi Səriştələr" },
 ];
 
 export default function NewCompetency() {

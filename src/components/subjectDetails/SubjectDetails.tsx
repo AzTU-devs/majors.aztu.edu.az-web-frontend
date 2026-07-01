@@ -341,7 +341,7 @@ export default function SubjectDeails() {
                             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 dark:text-gray-500">
                                 <EventNoteIcon sx={{ fontSize: 18 }} />
                             </span>
-                            <Input value={`Tədris ili: ${subjectDetails.year}`} className="!pl-10" />
+                            <Input value={`Akademik il: ${subjectDetails.year}`} className="!pl-10" />
                         </div>
                     )}
                 </div>

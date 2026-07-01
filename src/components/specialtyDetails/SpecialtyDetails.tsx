@@ -55,7 +55,7 @@ const TABS = [
   { key: "plo", label: "PLO" },
   { key: "gco", label: "Məzun İmkanları" },
   { key: "competency", label: "Kompetensiyalar" },
-  { key: "curriculum", label: "Kurikulum" },
+  { key: "curriculum", label: "Kurrikulum" },
 ];
 
 export default function SpecialtyDetails() {
@@ -438,7 +438,7 @@ export default function SpecialtyDetails() {
                             : "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
                         }`}
                       >
-                        {item.competency_type === 1 ? "Peşə Səriştələri" : "İxtisas Səriştələri"}
+                        {item.competency_type === 1 ? "Peşə Səriştələri" : "Ümumi Səriştələr"}
                       </span>
                       <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                         {item.competency_content}
@@ -504,7 +504,7 @@ export default function SpecialtyDetails() {
               <>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h4 className="text-sm font-semibold text-gray-800 dark:text-white/90">
-                    Kurikulum və Fənlər
+                    Kurrikulum və Fənlər
                   </h4>
                   <Link
                     to="/specialty-details/subjects/subject-matching-table"
@@ -580,10 +580,10 @@ export default function SpecialtyDetails() {
               <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand-200 bg-brand-50/50 p-10 text-center dark:border-brand-500/30 dark:bg-brand-500/[0.05]">
                 <SchoolIcon className="mb-3 text-brand-500" sx={{ fontSize: 52 }} />
                 <h3 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
-                  Kurikulum və Fənlər
+                  Kurrikulum və Fənlər
                 </h3>
                 <p className="mb-6 max-w-sm text-sm text-gray-500 dark:text-gray-400">
-                  Bu proqramda hələ fənn yoxdur. İlk fənni əlavə edərək kurikulumu qurun.
+                  Bu proqramda hələ fənn yoxdur. İlk fənni əlavə edərək kurrikulumu qurun.
                 </p>
                 <button
                   onClick={() =>
