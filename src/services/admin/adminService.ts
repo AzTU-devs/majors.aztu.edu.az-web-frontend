@@ -2,9 +2,11 @@ import apiClient from "../../util/apiClient";
 
 export interface ManagedAdmin {
     fin_kod: string;
-    name: string;
-    surname: string;
-    email: string;
+    // name/surname/email are null for a role=1 account that has no profile row
+    // yet (e.g. the seeded admin), so they must be treated as nullable.
+    name: string | null;
+    surname: string | null;
+    email: string | null;
     role: number;
     approved: boolean;
     created_at: string | null;

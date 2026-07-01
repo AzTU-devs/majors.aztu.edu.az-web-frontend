@@ -117,9 +117,9 @@ export default function Admins() {
   const openEdit = (admin: ManagedAdmin) => {
     setEditing(admin);
     setEditForm({
-      name: admin.name,
-      surname: admin.surname,
-      email: admin.email,
+      name: admin.name ?? "",
+      surname: admin.surname ?? "",
+      email: admin.email ?? "",
       fin_kod: admin.fin_kod,
       password: "",
     });
@@ -163,7 +163,7 @@ export default function Admins() {
     const confirm = await Swal.fire({
       icon: "warning",
       title: "Silinsin?",
-      text: `${admin.name} ${admin.surname} (${admin.fin_kod}) silinəcək.`,
+      text: `${admin.name ?? ""} ${admin.surname ?? ""} (${admin.fin_kod}) silinəcək.`,
       showCancelButton: true,
       confirmButtonText: "Bəli, sil",
       cancelButtonText: "Ləğv et",
@@ -245,13 +245,13 @@ export default function Admins() {
                   className="border-b border-gray-100 last:border-0 dark:border-white/5"
                 >
                   <TableCell className="px-5 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                    {admin.name}
+                    {admin.name ?? "—"}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
-                    {admin.surname}
+                    {admin.surname ?? "—"}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
-                    {admin.email}
+                    {admin.email ?? "—"}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm font-mono text-gray-600 dark:text-gray-400">
                     {admin.fin_kod}
