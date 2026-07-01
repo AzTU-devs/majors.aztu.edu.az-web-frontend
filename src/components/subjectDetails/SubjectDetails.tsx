@@ -16,6 +16,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import StarsIcon from '@mui/icons-material/Stars';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import TableChartIcon from '@mui/icons-material/TableChart';
 import { Clo, getCloBySubjectCode } from '../../services/clo/clo';
 import { deleteCurricula, getSubjectDetails, updateCurricula, SubjectDetails, AssessmentRow } from '../../services/curricula/curricula';
 import {
@@ -46,6 +47,7 @@ export default function SubjectDeails() {
     const [formOfEducation, setFormOfEducation] = useState('');
     const [languageOfInstruction, setLanguageOfInstruction] = useState('');
     const [inClassHours, setInClassHours] = useState('');
+    const [outOfClassHours, setOutOfClassHours] = useState('');
     const [teachingMethods, setTeachingMethods] = useState<string[]>([]);
     const [assessment, setAssessment] = useState<AssessmentRow[]>([]);
     const [saveLoading, setSaveLoading] = useState(false);
@@ -67,6 +69,7 @@ export default function SubjectDeails() {
                 setFormOfEducation(details.form_of_education ? String(details.form_of_education) : "");
                 setLanguageOfInstruction(details.language_of_instruction ? String(details.language_of_instruction) : "");
                 setInClassHours(details.in_class_hours ?? "");
+                setOutOfClassHours(details.out_of_class_hours ?? "");
                 setTeachingMethods(parseTeachingMethods(details.teaching_methods));
                 setAssessment(Array.isArray(details.assessment) && details.assessment.length > 0 ? details.assessment : DEFAULT_ASSESSMENT);
             });
@@ -164,6 +167,9 @@ export default function SubjectDeails() {
             }
             if (inClassHours !== (subjectDetails?.in_class_hours ?? "")) {
                 updateData.in_class_hours = inClassHours;
+            }
+            if (outOfClassHours !== (subjectDetails?.out_of_class_hours ?? "")) {
+                updateData.out_of_class_hours = outOfClassHours;
             }
             const methodsStr = teachingMethods.join(",");
             if (methodsStr !== (subjectDetails?.teaching_methods ?? "")) {
@@ -372,7 +378,7 @@ export default function SubjectDeails() {
                     width: "calc((100% / 2) - 20px)"
                 }}>
                     <Label>
-                        Həftə başı saat
+                        Tələbənin iş yükü
                     </Label>
                     {isLoading ? (
                         <div className="h-10 rounded bg-gray-200 animate-pulse w-full mt-1" />
@@ -382,7 +388,7 @@ export default function SubjectDeails() {
                                 <AccessTimeIcon sx={{ fontSize: 18 }} />
                             </span>
                             <Input
-                                placeholder='Həftə başı saat'
+                                placeholder='Tələbənin iş yükü'
                                 value={hoursPerWeek}
                                 onChange={e => setHoursPerWeek(e.target.value)}
                                 type="number"
@@ -467,6 +473,15 @@ export default function SubjectDeails() {
             </div>
 
             <div className="w-full mt-[15px]">
+                <Label>Auditoriya kənar saatlar</Label>
+                <TextArea
+                    placeholder="a) XX saat - sərbəst iş b) XX saat - hazırlıq və s."
+                    value={outOfClassHours}
+                    onChange={(value) => setOutOfClassHours(value)}
+                />
+            </div>
+
+            <div className="w-full mt-[15px]">
                 <Label>Tədris metodları</Label>
                 <TeachingMethodsPicker selected={teachingMethods} onChange={setTeachingMethods} />
             </div>
@@ -477,7 +492,17 @@ export default function SubjectDeails() {
             </div>
 
             <div className='mt-[20px]'>
-                <Label>Təlim nəticələri</Label>
+                <div className="flex items-center justify-between">
+                    <Label>Təlim nəticələri</Label>
+                    <button
+                        type="button"
+                        onClick={() => navigate("/specialty-details/subjects/subject-details/clo-plo-matching-table", { state: { subjectCode, subjectName, specialtyCode } })}
+                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:bg-gray-800"
+                    >
+                        <TableChartIcon sx={{ fontSize: 16 }} />
+                        CLO-PLO uyğunluq cədvəli
+                    </button>
+                </div>
                 {!clos || clos.length === 0 ? (
                     <p className="text-gray-500 italic">Heç bir təlim nəticəsi mövcud deyil.</p>
                 ) : (

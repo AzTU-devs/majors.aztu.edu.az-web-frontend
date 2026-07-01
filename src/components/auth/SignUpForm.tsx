@@ -80,8 +80,30 @@ export default function SignUpForm() {
     setCafedra(value);
   };
 
+  const passwordValid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password);
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!passwordValid) {
+      Swal.fire(
+        "Xəta!",
+        "Şifrə tələblərə uyğun deyil (minimum 8 simvol, böyük/kiçik hərf, rəqəm və xüsusi simvol).",
+        "error"
+      );
+      return;
+    }
+
+    if (password !== repeatedPassword) {
+      Swal.fire("Xəta!", "Şifrələr eyni deyil.", "error");
+      return;
+    }
+
     try {
       setFormLoading(true);
       const singUpCredentials = {
@@ -96,33 +118,36 @@ export default function SignUpForm() {
 
     const result = await signup(singUpCredentials);
 
-    if (result === "SUCCESS") {
+    if (result.status === "SUCCESS") {
       Swal.fire(
         "Uğurlu!",
-        "Qeydiyyat tamamlandı.",
+        "Qeydiyyat tamamlandı. Hesabınız admin təsdiqindən sonra aktivləşəcək.",
         "success"
       ).then(() => {
         setFormLoading(false);
       })
-    } else if (result === "CONFLICT") {
-      Swal.fire("Xəta!", "İstifadəçi artıq mövcuddur.", "error").then(() => {
+    } else if (result.status === "CONFLICT") {
+      Swal.fire("Xəta!", result.message || "İstifadəçi artıq mövcuddur.", "error").then(() => {
+        setFormLoading(false);
+      })
+    } else if (result.status === "VALIDATION") {
+      Swal.fire("Xəta!", result.message || "Məlumatlar düzgün deyil.", "error").then(() => {
         setFormLoading(false);
       })
     } else {
-      Swal.fire("Xəta!", "Naməlum bir səhv baş verdi.", "error").then(() => {
+      Swal.fire("Xəta!", result.message || "Naməlum bir səhv baş verdi.", "error").then(() => {
         setFormLoading(false);
       })
     }
     } catch (err) {
-      Swal.fire("Xəta!", "Naməlum bir səhv baş verdi.", "error").then(() => {
-        setFormLoading(false);
-      })
+      setFormLoading(false);
+      Swal.fire("Xəta!", "Naməlum bir səhv baş verdi.", "error");
     }
   };
 
   return (
-    <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
-      <div className="flex flex-col justify-center flex-1 w-full max-w-[50%] mx-auto">
+    <div className="flex flex-col flex-1 w-full overflow-y-auto no-scrollbar">
+      <div className="flex flex-col justify-center flex-1 w-full max-w-2xl px-2 sm:px-0">
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">

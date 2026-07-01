@@ -8,7 +8,8 @@ import NotFound from "./pages/OtherPage/NotFound";
 
 import NewGcoPage from "./pages/NewGcoPage/NewGcoPage";
 import NewPloPage from "./pages/NewPloPage/NewPloPage";
-import NewSloPage from "./pages/NewSloPage/NewSloPage";
+// SLO removed from the platform.
+// import NewSloPage from "./pages/NewSloPage/NewSloPage";
 import TopicsPage from "./pages/TopicsPage/TopicsPage";
 import NewCloPage from "./pages/NewCloPage/NewCloPage";
 import SubjectsPage from "./pages/SubjectsPage/SubjectsPage";
@@ -16,7 +17,9 @@ import NewTopicPage from "./pages/NewTopicPage/NewTopicPage";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireRole from "./components/auth/RequireRole";
 import UsersPage from "./pages/UsersPage/UsersPage";
+import AdminsPage from "./pages/AdminsPage/AdminsPage";
 import CompetencyMatchingTablePage from "./pages/CompetencyMatchingTablePage/CompetencyMatchingTablePage";
+import CloPloMatchingTablePage from "./pages/CloPloMatchingTablePage/CloPloMatchingTablePage";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import NewSubjectPage from "./pages/NewSubjectPage/NewSubjectPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
@@ -53,6 +56,9 @@ export default function App() {
               {/* User management & approval */}
               <Route path="/users" element={<UsersPage />} />
 
+              {/* Admin profile management */}
+              <Route path="/admins" element={<AdminsPage />} />
+
               {/* Faculties */}
               <Route path="/faculties" element={<FacultiesPage />} />
 
@@ -87,14 +93,17 @@ export default function App() {
             {/* Program Learning Outcomes (PLO) */}
             <Route path="/specialty-details/new-plo" element={<NewPloPage />} />
 
-            {/* Student Learning Outcomes (SLO) */}
-            <Route path="/specialty-details/new-slo" element={<NewSloPage />} />
+            {/* Student Learning Outcomes (SLO) — removed from the platform */}
+            {/* <Route path="/specialty-details/new-slo" element={<NewSloPage />} /> */}
 
             {/* Graduate Career Opportunities (GCO) */}
             <Route path="/specialty-details/new-gco" element={<NewGcoPage />} />
 
             {/* Course Learning Outcomes (CLO) */}
             <Route path="/specialty-details/subjects/subject-details/new-clo" element={<NewCloPage />} />
+
+            {/* CLO ↔ PLO matching table */}
+            <Route path="/specialty-details/subjects/subject-details/clo-plo-matching-table" element={<CloPloMatchingTablePage />} />
 
             {/* Competency */}
             <Route path="/specialty-details/new-competency" element={<NewCompetencyPage />} />

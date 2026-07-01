@@ -11,7 +11,7 @@ import TableChartIcon from "@mui/icons-material/TableChart";
 import { RootState } from "../../redux/store";
 import { useLocation, useNavigate } from "react-router";
 import { getPloBySpecailty, deletePlo, Plo } from "../../services/plo/ploService";
-import { getSloBySpecialty, deleteSlo, Slo } from "../../services/slo/sloService";
+// SLO removed from the platform.
 import { Gco, getGcosBySpecailty, deleteGco } from "../../services/gco/gcoService";
 import { Competency, getCompetencyBySpecialty, deleteCompetency } from "../../services/competency/competencyService";
 import { getSpecialtyChar, deleteSpecialtyChar, SpecialtyChar } from "../../services/specialtCharacteristics/specialtyChar";
@@ -48,12 +48,11 @@ const handleAfterDelete = async (
   }
 };
 
-type TabKey = "overview" | "plo" | "slo" | "gco" | "competency" | "curriculum";
+type TabKey = "overview" | "plo" | "gco" | "competency" | "curriculum";
 
 const TABS = [
   { key: "overview", label: "Ümumi məlumat" },
   { key: "plo", label: "PLO" },
-  { key: "slo", label: "SLO" },
   { key: "gco", label: "Məzun İmkanları" },
   { key: "competency", label: "Kompetensiyalar" },
   { key: "curriculum", label: "Kurikulum" },
@@ -113,25 +112,7 @@ export default function SpecialtyDetails() {
     getPlos();
   }, []);
 
-  // SLO
-  const [slo, setSlo] = useState<Slo[]>([]);
-  const [sloNoContent, setSloNoContent] = useState(false);
-
-  useEffect(() => {
-    const getSlos = async () => {
-      try {
-        const result = await getSloBySpecialty(specialtyCode, token ? token : "");
-        if (typeof result === "object") {
-          setSlo(result);
-        } else if (result === "NO CONTENT") {
-          setSloNoContent(true);
-        }
-      } catch (e) {
-        setError(true);
-      }
-    };
-    getSlos();
-  }, []);
+  // SLO removed from the platform.
 
   // GCO
   const [gco, setGco] = useState<Gco[]>([]);
@@ -356,66 +337,7 @@ export default function SpecialtyDetails() {
           </div>
         )}
 
-        {/* SLO TAB */}
-        {activeTab === "slo" && (
-          <div className="space-y-3">
-            {slo.length > 0 ? (
-              <>
-                {slo.map((item, index) => (
-                  <div
-                    key={index}
-                    className="group flex items-start gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
-                  >
-                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
-                      {index + 1}
-                    </span>
-                    <p className="flex-1 pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                      {item.slo_content}
-                    </p>
-                    <button
-                      onClick={async () => {
-                        if (!(await confirmDelete(item.slo_code))) return;
-                        const res = await deleteSlo(item.slo_code);
-                        handleAfterDelete(res, "SLO silindi.", () => {
-                          setSlo((prev) => prev.filter((p) => p.slo_code !== item.slo_code));
-                        });
-                      }}
-                      className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
-                      aria-label="Sil"
-                    >
-                      <DeleteOutlineIcon fontSize="small" />
-                    </button>
-                  </div>
-                ))}
-                <div className="flex justify-end pt-2">
-                  <button
-                    onClick={() =>
-                      navigate("/specialty-details/new-slo", { state: { specialtyCode, specialtyName } })
-                    }
-                    className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600"
-                  >
-                    <AddIcon sx={{ fontSize: 18 }} />
-                    SLO əlavə et
-                  </button>
-                </div>
-              </>
-            ) : sloNoContent ? (
-              <EmptyState
-                message="Tələbə Öyrənmə Nəticələri tapılmadı"
-                actionLabel="SLO əlavə et"
-                onAction={() =>
-                  navigate("/specialty-details/new-slo", { state: { specialtyCode, specialtyName } })
-                }
-              />
-            ) : (
-              <div className="space-y-3">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="h-14 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {/* SLO TAB removed from the platform. */}
 
         {/* GCO TAB */}
         {activeTab === "gco" && (

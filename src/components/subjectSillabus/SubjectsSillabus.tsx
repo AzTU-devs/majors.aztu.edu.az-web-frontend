@@ -125,7 +125,7 @@ export default function SubjectsSillabus() {
                             <td className={cell}>{details?.credit ?? "—"}</td>
                         </tr>
                         <tr>
-                            <td className={labelCell}>Həftəlik saat</td>
+                            <td className={labelCell}>Tələbənin iş yükü</td>
                             <td className={cell}>{details?.hours_per_week ?? "—"}</td>
                         </tr>
                         <tr>
@@ -152,6 +152,12 @@ export default function SubjectsSillabus() {
                             <tr>
                                 <td className={labelCell}>Auditoriyadaxili saatlar</td>
                                 <td className={`${cell} whitespace-pre-line`}>{details.in_class_hours}</td>
+                            </tr>
+                        )}
+                        {details?.out_of_class_hours && (
+                            <tr>
+                                <td className={labelCell}>Auditoriya kənar saatlar</td>
+                                <td className={`${cell} whitespace-pre-line`}>{details.out_of_class_hours}</td>
                             </tr>
                         )}
                         <tr>

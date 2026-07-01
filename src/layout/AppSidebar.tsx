@@ -5,6 +5,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -28,6 +29,7 @@ const sistemItems: NavItem[] = [
   { icon: <HomeFilledIcon />, name: "Ana Səhifə", path: "/" },
   { icon: <UserCircleIcon />, name: "Profil", path: "/profile" },
   { icon: <PeopleAltIcon />, name: "İstifadəçilər", path: "/users", roles: ADMIN_ONLY },
+  { icon: <AdminPanelSettingsIcon />, name: "Adminlər", path: "/admins", roles: ADMIN_ONLY },
 ];
 
 const akademikItems: NavItem[] = [

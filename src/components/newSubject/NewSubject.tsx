@@ -26,6 +26,7 @@ export default function NewSubject() {
     const [formOfEducation, setFormOfEducation] = useState<number>(1);
     const [languageOfInstruction, setLanguageOfInstruction] = useState<number>(1);
     const [inClassHours, setInClassHours] = useState("");
+    const [outOfClassHours, setOutOfClassHours] = useState("");
     const [teachingMethods, setTeachingMethods] = useState<string[]>([]);
     const [assessment, setAssessment] = useState<AssessmentRow[]>(DEFAULT_ASSESSMENT);
     const { specialtyCode } = location.state as { specialtyCode: string };
@@ -108,6 +109,7 @@ export default function NewSubject() {
                 form_of_education: formOfEducation,
                 language_of_instruction: languageOfInstruction,
                 in_class_hours: inClassHours,
+                out_of_class_hours: outOfClassHours,
                 teaching_methods: teachingMethods.join(","),
                 assessment: JSON.stringify(assessment)
             }
@@ -246,10 +248,10 @@ export default function NewSubject() {
                     width: "calc((100% / 2) - 20px)"
                 }}>
                     <Label>
-                        Həftə üzrə saat sayı
+                        Tələbənin iş yükü
                     </Label>
                     <Input
-                        placeholder='Həftə üzrə saat sayı'
+                        placeholder='Tələbənin iş yükü'
                         value={hoursPerWeek}
                         type='number'
                         onChange={
@@ -290,6 +292,16 @@ export default function NewSubject() {
                     placeholder='a) XX saat - mühazirə b) XX saat - seminar və s.'
                     value={inClassHours}
                     onChange={(value) => setInClassHours(value)}
+                />
+            </div>
+            <div className="w-full">
+                <Label>
+                    Auditoriya kənar saatlar
+                </Label>
+                <TextArea
+                    placeholder='a) XX saat - sərbəst iş b) XX saat - hazırlıq və s.'
+                    value={outOfClassHours}
+                    onChange={(value) => setOutOfClassHours(value)}
                 />
             </div>
             <div className="w-full">

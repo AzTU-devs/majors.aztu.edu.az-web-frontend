@@ -47,18 +47,33 @@ export const signin = async (credentials: Credentials) => {
 
 // signup with form data
 
-export const signup = async (signUpCredentials: SignUpCredentials) => {
+export interface SignUpResult {
+    status: "SUCCESS" | "CONFLICT" | "VALIDATION" | "ERROR";
+    message?: string;
+}
+
+export const signup = async (
+    signUpCredentials: SignUpCredentials
+): Promise<SignUpResult> => {
     try {
         const response = await apiClient.post("/auth/signup", signUpCredentials);
 
         if (response.data.statusCode === 201) {
-            return "SUCCESS";
-        } else if (response.data.statusCode === 400) {
-            return "CONFLICT";
-        } else {
-            return "ERROR";
+            return { status: "SUCCESS" };
         }
-    } catch (err) {
-        return "ERROR";
-    };
+        if (response.data.statusCode === 409) {
+            return { status: "CONFLICT", message: response.data.message };
+        }
+        return { status: "ERROR", message: response.data.message };
+    } catch (err: any) {
+        const httpStatus = err?.response?.status;
+        const message = err?.response?.data?.message;
+        if (httpStatus === 409) {
+            return { status: "CONFLICT", message };
+        }
+        if (httpStatus === 400) {
+            return { status: "VALIDATION", message };
+        }
+        return { status: "ERROR", message };
+    }
 };

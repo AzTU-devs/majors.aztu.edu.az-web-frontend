@@ -31,6 +31,7 @@ export interface SubjectPayload {
     form_of_education?: number;
     language_of_instruction?: number;
     in_class_hours?: string;
+    out_of_class_hours?: string;
     teaching_methods?: string;
     assessment?: string;
 };
@@ -47,6 +48,7 @@ export interface SubjectDetails {
     form_of_education?: number | null;
     language_of_instruction?: number | null;
     in_class_hours?: string | null;
+    out_of_class_hours?: string | null;
     teaching_methods?: string | null;
     assessment?: AssessmentRow[];
 };

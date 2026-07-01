@@ -4,8 +4,10 @@ import ThemeTogglerTwo from "../../components/common/ThemeTogglerTwo";
 
 export default function AuthLayout({
   children,
+  wide = false,
 }: {
   children: React.ReactNode;
+  wide?: boolean;
 }) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
@@ -52,8 +54,8 @@ export default function AuthLayout({
           <div className="relative z-10 grid grid-cols-3 gap-4">
             {[
               { v: "PLO", l: "Proqram nəticələri" },
-              { v: "SLO", l: "Tələbə nəticələri" },
               { v: "CLO", l: "Fənn nəticələri" },
+              { v: "GCO", l: "Məzun imkanları" },
             ].map((s) => (
               <div
                 key={s.v}
@@ -86,7 +88,11 @@ export default function AuthLayout({
             </Link>
           </div>
 
-          <div className="w-full max-w-md surface-card p-8 sm:p-10">
+          <div
+            className={`w-full surface-card p-8 sm:p-10 ${
+              wide ? "max-w-2xl" : "max-w-md"
+            }`}
+          >
             {children}
           </div>
         </main>
