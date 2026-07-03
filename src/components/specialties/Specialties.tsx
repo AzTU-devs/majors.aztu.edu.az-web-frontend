@@ -8,8 +8,17 @@ import { RootState } from "../../redux/store";
 import Pagination from "@mui/material/Pagination";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { getSpecialtiesByCafedra, getAllSpecialties, deleteSpecialty, Specialty } from "../../services/specialty/specialtyService";
+import { getSpecialtiesByCafedra, getAllSpecialties, deleteSpecialty, updateSpecialty, Specialty } from "../../services/specialty/specialtyService";
+
+// Escape user text before injecting into a SweetAlert `html` dialog.
+const esc = (s: string) =>
+    (s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 
 export default function Specialties() {
     const [end, setEnd] = useState<number>(6);
@@ -83,6 +92,53 @@ export default function Specialties() {
         }
     };
 
+    const handleEdit = async (e: React.MouseEvent, specialty: Specialty) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const { value } = await Swal.fire({
+            title: "İxtisası redaktə et",
+            html:
+                `<input id="swal-sp-name" class="swal2-input" placeholder="İxtisasın adı" value="${esc(specialty.specialty_name)}">` +
+                `<input id="swal-sp-code" class="swal2-input" placeholder="İxtisasın kodu" value="${esc(specialty.specialty_code)}">`,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "Yadda saxla",
+            cancelButtonText: "Ləğv et",
+            preConfirm: () => {
+                const name = (document.getElementById("swal-sp-name") as HTMLInputElement).value.trim();
+                const code = (document.getElementById("swal-sp-code") as HTMLInputElement).value.trim();
+                if (!name || !code) {
+                    Swal.showValidationMessage("Ad və kod boş ola bilməz");
+                    return;
+                }
+                return { name, code };
+            },
+        });
+        if (!value) return;
+
+        const payload: { specialty_name?: string; new_specialty_code?: string } = {};
+        if (value.name !== specialty.specialty_name) payload.specialty_name = value.name;
+        if (value.code !== specialty.specialty_code) payload.new_specialty_code = value.code;
+        if (!payload.specialty_name && !payload.new_specialty_code) return;
+
+        const res = await updateSpecialty(specialty.specialty_code, payload);
+        if (res.status === "SUCCESS") {
+            const finalCode = res.newCode || specialty.specialty_code;
+            setSpecialties((prev) =>
+                prev.map((s) =>
+                    s.specialty_code === specialty.specialty_code
+                        ? { ...s, specialty_name: value.name, specialty_code: finalCode }
+                        : s
+                )
+            );
+            Swal.fire("Yeniləndi", "İxtisas yeniləndi.", "success");
+        } else if (res.status === "CONFLICT") {
+            Swal.fire("Xəta!", res.message || "Bu kod və ya ad artıq mövcuddur.", "error");
+        } else {
+            Swal.fire("Xəta!", res.message || "İxtisas yenilənə bilmədi.", "error");
+        }
+    };
+
     const filtered = specialties.filter((s) =>
         s.specialty_name.toLowerCase().includes(search.toLowerCase()) ||
         s.specialty_code.toLowerCase().includes(search.toLowerCase())
@@ -148,6 +204,15 @@ export default function Specialties() {
                           >
                               <button
                                   type="button"
+                                  onClick={(e) => handleEdit(e, specialty)}
+                                  className="absolute right-12 top-3 grid h-8 w-8 place-items-center rounded-lg text-gray-400 opacity-0 transition hover:bg-brand-50 hover:text-brand-600 group-hover:opacity-100 dark:hover:bg-brand-500/10"
+                                  aria-label="Redaktə et"
+                                  title="Redaktə et"
+                              >
+                                  <EditOutlinedIcon fontSize="small" />
+                              </button>
+                              <button
+                                  type="button"
                                   onClick={(e) =>
                                       handleDelete(
                                           e,
@@ -167,7 +232,7 @@ export default function Specialties() {
                                   state={{ specialtyCode: specialty.specialty_code, specialtyName: specialty.specialty_name }}
                                   className="flex flex-col gap-3"
                               >
-                                  <div className="flex items-center justify-between pr-9">
+                                  <div className="flex items-center justify-between pr-16">
                                       <span className="inline-flex items-center rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                                           {specialty.specialty_code}
                                       </span>

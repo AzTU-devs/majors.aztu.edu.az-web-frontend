@@ -58,6 +58,30 @@ export const getSpecialtiesByCafedra = async (cafedraCode: string, token: string
     }
 }
 
+export interface SpecialtyUpdateResult {
+    status: "SUCCESS" | "CONFLICT" | "ERROR";
+    newCode?: string;
+    message?: string;
+}
+
+export const updateSpecialty = async (
+    specialtyCode: string,
+    payload: { specialty_name?: string; new_specialty_code?: string }
+): Promise<SpecialtyUpdateResult> => {
+    try {
+        const response = await apiClient.put(`/api/specialty/${specialtyCode}`, payload);
+        if (response.data.statusCode === 200) {
+            return { status: "SUCCESS", newCode: response.data.specialty_code };
+        }
+        return { status: "ERROR", message: response.data.message };
+    } catch (e: any) {
+        if (e?.response?.status === 409) {
+            return { status: "CONFLICT", message: e.response.data?.message };
+        }
+        return { status: "ERROR", message: e?.response?.data?.message };
+    }
+};
+
 export const deleteSpecialty = async (specialtyCode: string) => {
     try {
         const response = await apiClient.delete(`/api/specialty/${specialtyCode}`);
