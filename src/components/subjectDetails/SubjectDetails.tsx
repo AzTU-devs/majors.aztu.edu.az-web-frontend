@@ -17,7 +17,7 @@ import StarsIcon from '@mui/icons-material/Stars';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import { Clo, getCloBySubjectCode } from '../../services/clo/clo';
+import { Clo, getCloBySubjectCode, updateClo } from '../../services/clo/clo';
 import { deleteCurricula, getSubjectDetails, updateCurricula, SubjectDetails, AssessmentRow } from '../../services/curricula/curricula';
 import {
     FORM_OF_EDUCATION_OPTIONS,
@@ -126,6 +126,30 @@ export default function SubjectDeails() {
             });
         } finally {
             setDeleteLoading(false);
+        }
+    };
+
+    const handleEditClo = async (clo: Clo) => {
+        if (!clo.clo_code) return;
+        const { value } = await Swal.fire({
+            title: "Təlim nəticəsini redaktə et",
+            input: "textarea",
+            inputValue: clo.clo_content,
+            inputLabel: "CLO məzmunu",
+            showCancelButton: true,
+            confirmButtonText: "Yadda saxla",
+            cancelButtonText: "Ləğv et",
+            inputValidator: (v) => (!v.trim() ? "Boş ola bilməz" : undefined),
+        });
+        if (!value || value.trim() === clo.clo_content) return;
+        const res = await updateClo(clo.clo_code, value.trim());
+        if (res === "SUCCESS") {
+            setClos((prev) =>
+                prev.map((c) => (c.clo_code === clo.clo_code ? { ...c, clo_content: value.trim() } : c))
+            );
+            Swal.fire("Yeniləndi", "Təlim nəticəsi yeniləndi.", "success");
+        } else {
+            Swal.fire("Xəta!", "Təlim nəticəsi yenilənə bilmədi.", "error");
         }
     };
 
@@ -506,10 +530,19 @@ export default function SubjectDeails() {
                 {!clos || clos.length === 0 ? (
                     <p className="text-gray-500 italic">Heç bir təlim nəticəsi mövcud deyil.</p>
                 ) : (
-                    <ul className="list-disc list-inside space-y-1 text-gray-600">
+                    <ul className="space-y-1 text-gray-600">
                         {clos.map((clo, index) => (
-                            <li key={index}>
-                                {clo.clo_content}
+                            <li key={index} className="group flex items-start gap-2">
+                                <span className="flex-1">• {clo.clo_content}</span>
+                                {clo.clo_code && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleEditClo(clo)}
+                                        className="rounded-lg border border-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 opacity-0 transition group-hover:opacity-100 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                                    >
+                                        Redaktə et
+                                    </button>
+                                )}
                             </li>
                         ))}
                     </ul>

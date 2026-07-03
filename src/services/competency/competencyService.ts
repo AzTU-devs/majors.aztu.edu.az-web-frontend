@@ -75,6 +75,21 @@ export const addCompetency = async (competencyPayload: CompetencyPayload, token:
         throw error;
     }
 }
+export const updateCompetency = async (
+    competencyCode: string,
+    payload: { competency_content: string; competency_type?: number }
+) => {
+    try {
+        const response = await apiClient.put(`/api/competency/${competencyCode}`, payload);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};
+
 export const deleteCompetency = async (competencyCode: string) => {
     try {
         const response = await apiClient.delete(`/api/competency/${competencyCode}`);

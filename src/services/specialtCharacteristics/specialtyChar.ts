@@ -65,6 +65,24 @@ export const getSpecialtyChar = async (specialtyCode: string, token: string) => 
         return "ERROR";
     }
 };
+export const updateSpecialtyChar = async (
+    specialtyCode: string,
+    payload: { program_desc: string; degree_requirements: string }
+) => {
+    try {
+        const response = await apiClient.put(
+            `/api/specialty-characteristics/${specialtyCode}`,
+            payload
+        );
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};
+
 export const deleteSpecialtyChar = async (specialtyCode: string) => {
     try {
         const response = await apiClient.delete(`/api/specialty-characteristics/${specialtyCode}`);

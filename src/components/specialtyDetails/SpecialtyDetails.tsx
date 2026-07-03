@@ -5,16 +5,17 @@ import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import SchoolIcon from "@mui/icons-material/School";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import { RootState } from "../../redux/store";
 import { useLocation, useNavigate } from "react-router";
-import { getPloBySpecailty, deletePlo, Plo } from "../../services/plo/ploService";
+import { getPloBySpecailty, deletePlo, updatePlo, Plo } from "../../services/plo/ploService";
 // SLO removed from the platform.
-import { Gco, getGcosBySpecailty, deleteGco } from "../../services/gco/gcoService";
-import { Competency, getCompetencyBySpecialty, deleteCompetency } from "../../services/competency/competencyService";
-import { getSpecialtyChar, deleteSpecialtyChar, SpecialtyChar } from "../../services/specialtCharacteristics/specialtyChar";
+import { Gco, getGcosBySpecailty, deleteGco, updateGco } from "../../services/gco/gcoService";
+import { Competency, getCompetencyBySpecialty, deleteCompetency, updateCompetency } from "../../services/competency/competencyService";
+import { getSpecialtyChar, deleteSpecialtyChar, updateSpecialtyChar, SpecialtyChar } from "../../services/specialtCharacteristics/specialtyChar";
 import { Subject, getCurriculaBySpecialtyCode, deleteCurricula } from "../../services/curricula/curricula";
 import SectionTabStrip from "../common/SectionTabStrip";
 import EmptyState from "../common/EmptyState";
@@ -31,6 +32,14 @@ const confirmDelete = async (label: string) =>
       cancelButtonText: "Ləğv et",
     })
   ).isConfirmed;
+
+// Escape user text before injecting into SweetAlert `html` dialogs.
+const esc = (s: string) =>
+  (s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 
 const handleAfterDelete = async (
   result: string,
@@ -196,6 +205,152 @@ export default function SpecialtyDetails() {
     });
   };
 
+  // ---- In-place edit handlers ---------------------------------------------
+  const handleEditPlo = async (item: Plo) => {
+    const { value } = await Swal.fire({
+      title: "PLO redaktə et",
+      input: "textarea",
+      inputValue: item.plo_content,
+      inputLabel: "PLO məzmunu",
+      showCancelButton: true,
+      confirmButtonText: "Yadda saxla",
+      cancelButtonText: "Ləğv et",
+      inputValidator: (v) => (!v.trim() ? "Boş ola bilməz" : undefined),
+    });
+    if (!value || value.trim() === item.plo_content) return;
+    const res = await updatePlo(item.plo_code, value.trim());
+    if (res === "SUCCESS") {
+      setPlo((prev) =>
+        prev.map((p) => (p.plo_code === item.plo_code ? { ...p, plo_content: value.trim() } : p))
+      );
+      Swal.fire("Yeniləndi", "PLO yeniləndi.", "success");
+    } else {
+      Swal.fire("Xəta!", "PLO yenilənə bilmədi.", "error");
+    }
+  };
+
+  const handleEditGco = async (item: Gco) => {
+    const { value } = await Swal.fire({
+      title: "Məzun imkanı redaktə et",
+      html:
+        `<input id="swal-gco-title" class="swal2-input" placeholder="Başlıq" value="${esc(item.career_title)}">` +
+        `<textarea id="swal-gco-content" class="swal2-textarea" placeholder="Məzmun">${esc(item.career_content)}</textarea>`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Yadda saxla",
+      cancelButtonText: "Ləğv et",
+      preConfirm: () => {
+        const title = (document.getElementById("swal-gco-title") as HTMLInputElement).value.trim();
+        const content = (document.getElementById("swal-gco-content") as HTMLTextAreaElement).value.trim();
+        if (!title || !content) {
+          Swal.showValidationMessage("Başlıq və məzmun boş ola bilməz");
+          return;
+        }
+        return { title, content };
+      },
+    });
+    if (!value) return;
+    const res = await updateGco(item.career_code, {
+      career_title: value.title,
+      career_content: value.content,
+    });
+    if (res === "SUCCESS") {
+      setGco((prev) =>
+        prev.map((g) =>
+          g.career_code === item.career_code
+            ? { ...g, career_title: value.title, career_content: value.content }
+            : g
+        )
+      );
+      Swal.fire("Yeniləndi", "Məzun imkanı yeniləndi.", "success");
+    } else {
+      Swal.fire("Xəta!", "Yenilənə bilmədi.", "error");
+    }
+  };
+
+  const handleEditCompetency = async (item: Competency) => {
+    const { value } = await Swal.fire({
+      title: "Kompetensiya redaktə et",
+      html:
+        `<select id="swal-comp-type" class="swal2-select">` +
+        `<option value="1" ${item.competency_type === 1 ? "selected" : ""}>Peşə Səriştələri</option>` +
+        `<option value="2" ${item.competency_type === 2 ? "selected" : ""}>Ümumi Səriştələr</option>` +
+        `</select>` +
+        `<textarea id="swal-comp-content" class="swal2-textarea" placeholder="Məzmun">${esc(item.competency_content)}</textarea>`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Yadda saxla",
+      cancelButtonText: "Ləğv et",
+      preConfirm: () => {
+        const type = Number((document.getElementById("swal-comp-type") as HTMLSelectElement).value);
+        const content = (document.getElementById("swal-comp-content") as HTMLTextAreaElement).value.trim();
+        if (!content) {
+          Swal.showValidationMessage("Məzmun boş ola bilməz");
+          return;
+        }
+        return { type, content };
+      },
+    });
+    if (!value) return;
+    const res = await updateCompetency(item.competency_code, {
+      competency_content: value.content,
+      competency_type: value.type,
+    });
+    if (res === "SUCCESS") {
+      setCompetency((prev) =>
+        prev.map((c) =>
+          c.competency_code === item.competency_code
+            ? { ...c, competency_content: value.content, competency_type: value.type }
+            : c
+        )
+      );
+      Swal.fire("Yeniləndi", "Kompetensiya yeniləndi.", "success");
+    } else {
+      Swal.fire("Xəta!", "Yenilənə bilmədi.", "error");
+    }
+  };
+
+  const handleEditOverview = async () => {
+    if (!specialtyChar) return;
+    const reqStr = Array.isArray(specialtyChar.degree_requirements)
+      ? specialtyChar.degree_requirements.join("\n")
+      : specialtyChar.degree_requirements || "";
+    const { value } = await Swal.fire({
+      title: "Ümumi məlumatı redaktə et",
+      width: 640,
+      html:
+        `<label class="swal2-input-label" style="text-align:left">Proqramın Təsviri</label>` +
+        `<textarea id="swal-ov-desc" class="swal2-textarea">${esc(specialtyChar.program_desc || "")}</textarea>` +
+        `<label class="swal2-input-label" style="text-align:left">Proqramın Tələbləri</label>` +
+        `<textarea id="swal-ov-req" class="swal2-textarea">${esc(reqStr)}</textarea>`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Yadda saxla",
+      cancelButtonText: "Ləğv et",
+      preConfirm: () => {
+        const program_desc = (document.getElementById("swal-ov-desc") as HTMLTextAreaElement).value.trim();
+        const degree_requirements = (document.getElementById("swal-ov-req") as HTMLTextAreaElement).value.trim();
+        if (!program_desc || !degree_requirements) {
+          Swal.showValidationMessage("Sahələr boş ola bilməz");
+          return;
+        }
+        return { program_desc, degree_requirements };
+      },
+    });
+    if (!value) return;
+    const res = await updateSpecialtyChar(specialtyCode, value);
+    if (res === "SUCCESS") {
+      setSpecilatyChar({
+        ...specialtyChar,
+        program_desc: value.program_desc,
+        degree_requirements: value.degree_requirements,
+      });
+      Swal.fire("Yeniləndi", "Ümumi məlumat yeniləndi.", "success");
+    } else {
+      Swal.fire("Xəta!", "Yenilənə bilmədi.", "error");
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Specialty header card */}
@@ -240,7 +395,14 @@ export default function SpecialtyDetails() {
                       : specialtyChar.degree_requirements || "—"}
                   </p>
                 </div>
-                <div className="flex justify-end pt-2">
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    onClick={handleEditOverview}
+                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:bg-gray-800"
+                  >
+                    <EditOutlinedIcon sx={{ fontSize: 18 }} />
+                    Redaktə et
+                  </button>
                   <button
                     onClick={async () => {
                       if (!(await confirmDelete("Ümumi məlumat"))) return;
@@ -292,6 +454,13 @@ export default function SpecialtyDetails() {
                     <p className="flex-1 pt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                       {item.plo_content}
                     </p>
+                    <button
+                      onClick={() => handleEditPlo(item)}
+                      className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-500/10"
+                      aria-label="Redaktə et"
+                    >
+                      <EditOutlinedIcon fontSize="small" />
+                    </button>
                     <button
                       onClick={async () => {
                         if (!(await confirmDelete(item.plo_code))) return;
@@ -358,19 +527,28 @@ export default function SpecialtyDetails() {
                           {item.career_title}
                         </h5>
                       </div>
-                      <button
-                        onClick={async () => {
-                          if (!(await confirmDelete(item.career_title))) return;
-                          const res = await deleteGco(item.career_code);
-                          handleAfterDelete(res, "Məzun imkanı silindi.", () => {
-                            setGco((prev) => prev.filter((p) => p.career_code !== item.career_code));
-                          });
-                        }}
-                        className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
-                        aria-label="Sil"
-                      >
-                        <DeleteOutlineIcon fontSize="small" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleEditGco(item)}
+                          className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-500/10"
+                          aria-label="Redaktə et"
+                        >
+                          <EditOutlinedIcon fontSize="small" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!(await confirmDelete(item.career_title))) return;
+                            const res = await deleteGco(item.career_code);
+                            handleAfterDelete(res, "Məzun imkanı silindi.", () => {
+                              setGco((prev) => prev.filter((p) => p.career_code !== item.career_code));
+                            });
+                          }}
+                          className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-error-50 hover:text-error-600 dark:hover:bg-error-500/10"
+                          aria-label="Sil"
+                        >
+                          <DeleteOutlineIcon fontSize="small" />
+                        </button>
+                      </div>
                     </div>
                     <p className="p-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                       {item.career_content}
@@ -444,6 +622,13 @@ export default function SpecialtyDetails() {
                         {item.competency_content}
                       </p>
                     </div>
+                    <button
+                      onClick={() => handleEditCompetency(item)}
+                      className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-500/10"
+                      aria-label="Redaktə et"
+                    >
+                      <EditOutlinedIcon fontSize="small" />
+                    </button>
                     <button
                       onClick={async () => {
                         if (!(await confirmDelete(item.competency_code))) return;

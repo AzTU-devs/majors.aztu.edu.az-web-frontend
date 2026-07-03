@@ -73,6 +73,21 @@ export const addGco = async (gcoPayload: GcoPayload, token: string) => {
         throw error;
     }
 }
+export const updateGco = async (
+    careerCode: string,
+    payload: { career_content: string; career_title?: string }
+) => {
+    try {
+        const response = await apiClient.put(`/api/gco/${careerCode}`, payload);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT FOUND";
+        return "ERROR";
+    } catch (e: any) {
+        if (e?.response?.status === 404) return "NOT FOUND";
+        return "ERROR";
+    }
+};
+
 export const deleteGco = async (careerCode: string) => {
     try {
         const response = await apiClient.delete(`/api/gco/${careerCode}`);
