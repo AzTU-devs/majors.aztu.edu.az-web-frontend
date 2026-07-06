@@ -56,7 +56,7 @@ export interface SubjectDetails {
 export const getCurriculaBySpecialtyCode = async (specialtyCode: string, start: number, end: number) => {
     try {
         const response = await apiClient.get(
-            `/api/curricula/${specialtyCode}/subjects?start=${start}&end=${end}&lang=${lang_code}`
+            `/api/curricula/${encodeURIComponent(specialtyCode)}/subjects?start=${start}&end=${end}&lang=${lang_code}`
         );
         if (response.data.statusCode === 200) {
             return {
@@ -95,7 +95,7 @@ export const addCurricula = async (subjectPayload: SubjectPayload) => {
 
 export const getSubjectDetails = async (subjectCode: string) => {
     try {
-        const response = await apiClient.get(`/api/curricula/${subjectCode}?lang=${lang_code}`);
+        const response = await apiClient.get(`/api/curricula/${encodeURIComponent(subjectCode)}?lang=${lang_code}`);
 
         if (response.data.statusCode === 200) {
             return response.data.subject_details;
@@ -111,7 +111,7 @@ export const getSubjectDetails = async (subjectCode: string) => {
 
 export const deleteCurricula = async (subjectCode: string, token: string) => {
     try {
-        const response = await apiClient.delete(`/api/curricula/${subjectCode}/delete`,
+        const response = await apiClient.delete(`/api/curricula/${encodeURIComponent(subjectCode)}/delete`,
             { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.data.statusCode === 200) {
@@ -129,7 +129,7 @@ export const deleteCurricula = async (subjectCode: string, token: string) => {
 export const updateCurricula = async (subjectCode: string, updateData: any, token: string) => {
     try {
         const response = await apiClient.patch(
-            `/api/curricula/${subjectCode}/update`,
+            `/api/curricula/${encodeURIComponent(subjectCode)}/update`,
             updateData,
             { headers: { Authorization: `Bearer ${token}` } }
         );

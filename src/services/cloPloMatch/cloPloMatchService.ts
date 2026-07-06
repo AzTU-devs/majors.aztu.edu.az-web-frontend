@@ -23,7 +23,7 @@ export const createCloPloMatch = async (payload: CloPloMatchPayload) => {
 // Return every CLO→PLO match for the CLOs that belong to a subject.
 export const getCloPloMatchesBySubject = async (subject_code: string) => {
     try {
-        const response = await apiClient.get(`/api/clo-plo-match/subject/${subject_code}`);
+        const response = await apiClient.get(`/api/clo-plo-match/subject/${encodeURIComponent(subject_code)}`);
 
         if (response.data.statusCode === 200) {
             return response.data.data as { clo_code: string; plo_code: string }[];

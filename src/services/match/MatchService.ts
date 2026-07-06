@@ -21,7 +21,7 @@ export const createMatch = async (payload: MatchPayload) => {
 
 export const getMatchedPlosBySubject = async (subject_code: string) => {
     try {
-        const response = await apiClient.get(`/api/match/subject/${subject_code}`);
+        const response = await apiClient.get(`/api/match/subject/${encodeURIComponent(subject_code)}`);
 
         if (response.data.statusCode === 200) {
             // returns an array of matched PLOs

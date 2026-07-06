@@ -31,7 +31,7 @@ export const createClo = async (cloPayload: CloPayload) => {
 
 export const updateClo = async (cloCode: string, clo_content: string) => {
     try {
-        const response = await apiClient.put(`/api/clo/${cloCode}`, { clo_content });
+        const response = await apiClient.put(`/api/clo/${encodeURIComponent(cloCode)}`, { clo_content });
         if (response.data.status_code === 200) return "SUCCESS";
         if (response.data.status_code === 404) return "NOT_FOUND";
         return "ERROR";
@@ -43,7 +43,7 @@ export const updateClo = async (cloCode: string, clo_content: string) => {
 
 export const getCloBySubjectCode = async (subjectCode: string) => {
     try {
-        const response = await apiClient.get(`/api/clo/${subjectCode}?lang=${lang_code}`);
+        const response = await apiClient.get(`/api/clo/${encodeURIComponent(subjectCode)}?lang=${lang_code}`);
 
         console.log(response, subjectCode);
 
