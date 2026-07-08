@@ -106,9 +106,14 @@ export default function Specialties() {
             cancelButtonText: "Ləğv et",
             preConfirm: () => {
                 const name = (document.getElementById("swal-sp-name") as HTMLInputElement).value.trim();
-                const code = (document.getElementById("swal-sp-code") as HTMLInputElement).value.trim();
+                const rawCode = (document.getElementById("swal-sp-code") as HTMLInputElement).value.trim();
+                const code = rawCode.replace(/[^\p{L}\p{N}()-]/gu, "");
                 if (!name || !code) {
                     Swal.showValidationMessage("Ad və kod boş ola bilməz");
+                    return;
+                }
+                if (code !== rawCode) {
+                    Swal.showValidationMessage("Kod yalnız hərf, rəqəm və ( ) - simvollarından ibarət ola bilər");
                     return;
                 }
                 return { name, code };

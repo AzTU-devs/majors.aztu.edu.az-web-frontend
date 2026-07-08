@@ -17,7 +17,7 @@ import StarsIcon from '@mui/icons-material/Stars';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import { Clo, getCloBySubjectCode, updateClo } from '../../services/clo/clo';
+import { Clo, getCloBySubjectCode, updateClo, deleteClo } from '../../services/clo/clo';
 import { deleteCurricula, getSubjectDetails, updateCurricula, SubjectDetails, AssessmentRow } from '../../services/curricula/curricula';
 import {
     FORM_OF_EDUCATION_OPTIONS,
@@ -37,6 +37,7 @@ export default function SubjectDeails() {
     const { specialtyCode } = location.state as { specialtyCode: string };
     const token = useSelector((state: RootState) => state.auth.token);
     const [subjectDetails, setSubjectDetails] = useState<SubjectDetails>();
+    const [notFound, setNotFound] = useState(false);
     // Editable state for each field
     const [subjectName, setSubjectName] = useState('');
     const [subjectDescription, setSubjectDescription] = useState('');
@@ -58,7 +59,12 @@ export default function SubjectDeails() {
     useEffect(() => {
         getSubjectDetails(subjectCode)
             .then((details) => {
-                if (!details || typeof details !== "object") return;
+                if (!details || typeof details !== "object") {
+                    // Bad/renamed/whitespace code — don't hang on the skeleton.
+                    setNotFound(true);
+                    return;
+                }
+                setNotFound(false);
                 setSubjectDetails(details);
                 setSubjectName(details.subject_name ?? "");
                 setSubjectDescription(details.subject_description ?? "");
@@ -153,6 +159,27 @@ export default function SubjectDeails() {
         }
     };
 
+    const handleDeleteClo = async (clo: Clo) => {
+        if (!clo.clo_code) return;
+        const confirm = await Swal.fire({
+            icon: "warning",
+            title: "Silinsin?",
+            text: "Bu təlim nəticəsi (CLO) silinəcək.",
+            showCancelButton: true,
+            confirmButtonText: "Bəli, sil",
+            cancelButtonText: "Ləğv et",
+            confirmButtonColor: "#dc2626",
+        });
+        if (!confirm.isConfirmed) return;
+        const res = await deleteClo(clo.clo_code);
+        if (res === "SUCCESS") {
+            setClos((prev) => prev.filter((c) => c.clo_code !== clo.clo_code));
+            Swal.fire("Silindi", "Təlim nəticəsi silindi.", "success");
+        } else {
+            Swal.fire("Xəta!", "Təlim nəticəsi silinə bilmədi.", "error");
+        }
+    };
+
     const isLoading = subjectDetails === undefined;
     const handleSave = async () => {
         setSaveLoading(true);
@@ -226,6 +253,25 @@ export default function SubjectDeails() {
             setSaveLoading(false);
         }
     };
+
+    if (notFound) {
+        return (
+            <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-white/[0.03]">
+                <p className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    Fənn tapılmadı
+                </p>
+                <p className="max-w-md text-sm text-gray-500 dark:text-gray-400">
+                    Bu fənn açıla bilmədi. Fənn kodu yanlış simvol və ya boşluq ehtiva edə bilər.
+                </p>
+                <button
+                    onClick={() => navigate(-1)}
+                    className="rounded-xl bg-brand-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-600"
+                >
+                    Geri qayıt
+                </button>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -535,13 +581,22 @@ export default function SubjectDeails() {
                             <li key={index} className="group flex items-start gap-2">
                                 <span className="flex-1">• {clo.clo_content}</span>
                                 {clo.clo_code && (
-                                    <button
-                                        type="button"
-                                        onClick={() => handleEditClo(clo)}
-                                        className="rounded-lg border border-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 opacity-0 transition group-hover:opacity-100 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-                                    >
-                                        Redaktə et
-                                    </button>
+                                    <span className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleEditClo(clo)}
+                                            className="rounded-lg border border-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                                        >
+                                            Redaktə et
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeleteClo(clo)}
+                                            className="rounded-lg border border-error-200 px-2 py-0.5 text-xs font-medium text-error-600 transition hover:bg-error-50 dark:border-error-500/30 dark:hover:bg-error-500/10"
+                                        >
+                                            Sil
+                                        </button>
+                                    </span>
                                 )}
                             </li>
                         ))}

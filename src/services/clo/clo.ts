@@ -29,6 +29,18 @@ export const createClo = async (cloPayload: CloPayload) => {
     }
 }
 
+export const deleteClo = async (cloCode: string) => {
+    try {
+        const response = await apiClient.delete(`/api/clo/${encodeURIComponent(cloCode)}`);
+        if (response.data.status_code === 200) return "SUCCESS";
+        if (response.data.status_code === 404) return "NOT_FOUND";
+        return "ERROR";
+    } catch (err: any) {
+        if (err?.response?.status === 404) return "NOT_FOUND";
+        return "ERROR";
+    }
+};
+
 export const updateClo = async (cloCode: string, clo_content: string) => {
     try {
         const response = await apiClient.put(`/api/clo/${encodeURIComponent(cloCode)}`, { clo_content });

@@ -71,9 +71,21 @@ export const addTopic = async (topicPayload: TopicPayload, token: string) => {
     }
 }
 
+export const deleteTopic = async (topicCode: string) => {
+    try {
+        const response = await apiClient.delete(`/api/topic/${encodeURIComponent(topicCode)}`);
+        if (response.data.statusCode === 200) return "SUCCESS";
+        if (response.data.statusCode === 404) return "NOT_FOUND";
+        return "ERROR";
+    } catch (error: any) {
+        if (error?.response?.status === 404) return "NOT_FOUND";
+        return "ERROR";
+    }
+};
+
 export const getTopics = async (subjectCode: string, start: number, end: number) => {
     try {
-        const response = await apiClient.get(`/api/topic/${subjectCode}?start=${start}&end=${end}&lang=${lang_code}`);
+        const response = await apiClient.get(`/api/topic/${encodeURIComponent(subjectCode)}?start=${start}&end=${end}&lang=${lang_code}`);
 
         if (response.data.statusCode === 200) {
             return {

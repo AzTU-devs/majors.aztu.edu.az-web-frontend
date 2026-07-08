@@ -120,7 +120,7 @@ export default function Faculties() {
           <Label>Fakültənin kodu</Label>
           <Input
             value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^\p{L}\p{N}()-]/gu, ""))}
             placeholder="ITF"
           />
         </div>

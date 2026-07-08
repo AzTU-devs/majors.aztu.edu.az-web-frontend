@@ -157,7 +157,7 @@ export default function NewSubject() {
                     <Label>
                         Fənn kodu
                     </Label>
-                    <Input placeholder='Fənn kodu' value={subjectCode} onChange={(e) => { setSubjectCode(e.target.value) }} />
+                    <Input placeholder='Fənn kodu' value={subjectCode} onChange={(e) => { setSubjectCode(e.target.value.replace(/[^\p{L}\p{N}()-]/gu, "")) }} />
                 </div>
             </div>
             <div className="flex justify-between items-center w-full">

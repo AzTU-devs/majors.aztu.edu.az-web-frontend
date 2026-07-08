@@ -13,9 +13,16 @@ export const LANGUAGE_OPTIONS = [
     { value: "1", label: "Azərbaycan" },
     { value: "2", label: "İngilis" },
     { value: "3", label: "Rus" },
+    { value: "4", label: "Alman" },
+    { value: "5", label: "Türk" },
 ];
 export const languageLabel = (v?: number | null) =>
-    v === 1 ? "Azərbaycan" : v === 2 ? "İngilis" : v === 3 ? "Rus" : "—";
+    v === 1 ? "Azərbaycan"
+        : v === 2 ? "İngilis"
+        : v === 3 ? "Rus"
+        : v === 4 ? "Alman"
+        : v === 5 ? "Türk"
+        : "—";
 
 // Teaching methods (stored as comma-separated keys)
 export const TEACHING_METHODS: { key: string; label: string }[] = [

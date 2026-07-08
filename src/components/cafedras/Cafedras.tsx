@@ -148,7 +148,7 @@ export default function Cafedras() {
           <Label>Kafedranın kodu</Label>
           <Input
             value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^\p{L}\p{N}()-]/gu, ""))}
             placeholder="KMK"
           />
         </div>

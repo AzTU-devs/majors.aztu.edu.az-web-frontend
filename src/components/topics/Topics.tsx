@@ -1,10 +1,12 @@
+import Swal from "sweetalert2";
 import Stack from '@mui/material/Stack';
 import { Skeleton } from "@mui/material";
 import { useLocation, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import Pagination from '@mui/material/Pagination';
-import { Topic, getTopics } from "../../services/topic/topic";
+import { Topic, getTopics, deleteTopic } from "../../services/topic/topic";
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 export default function Topics() {
     const location = useLocation();
@@ -15,6 +17,28 @@ export default function Topics() {
     const [topics, setTopics] = useState<Topic[]>([]);
     const [topicLength, setTopicLength] = useState<number>(0);
     const { subjectCode } = location.state as { subjectCode: string };
+
+    const handleDeleteTopic = async (e: React.MouseEvent, topic: Topic) => {
+        e.stopPropagation();
+        const confirm = await Swal.fire({
+            icon: "warning",
+            title: "Silinsin?",
+            text: `"${topic.topic_name}" mövzusu silinəcək.`,
+            showCancelButton: true,
+            confirmButtonText: "Bəli, sil",
+            cancelButtonText: "Ləğv et",
+            confirmButtonColor: "#dc2626",
+        });
+        if (!confirm.isConfirmed) return;
+        const res = await deleteTopic(topic.topic_code);
+        if (res === "SUCCESS") {
+            setTopics((prev) => prev.filter((t) => t.topic_code !== topic.topic_code));
+            setTopicLength((prev) => Math.max(0, prev - 1));
+            Swal.fire("Silindi", "Mövzu silindi.", "success");
+        } else {
+            Swal.fire("Xəta!", "Mövzu silinə bilmədi.", "error");
+        }
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -74,18 +98,29 @@ export default function Topics() {
                                 <div>
                                     {topic.topic_name} ({topic.topic_type === 1 ? "Mühazirə" : topic.topic_type === 2 ? "Məşğələ" : topic.topic_type === 3 ? "Laboratoriya" : topic.topic_type === 4 ? "Sərbəst iş" : "Mövcud deyil"})
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        goToEdit();
-                                    }}
-                                    title="Düzəliş et"
-                                    className="flex items-center gap-1 rounded-[10px] bg-white/20 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-white hover:text-blue-500"
-                                >
-                                    <EditIcon sx={{ fontSize: 18 }} />
-                                    Düzəliş et
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            goToEdit();
+                                        }}
+                                        title="Düzəliş et"
+                                        className="flex items-center gap-1 rounded-[10px] bg-white/20 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-white hover:text-blue-500"
+                                    >
+                                        <EditIcon sx={{ fontSize: 18 }} />
+                                        Düzəliş et
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => handleDeleteTopic(e, topic)}
+                                        title="Sil"
+                                        className="flex items-center gap-1 rounded-[10px] bg-white/20 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-white hover:text-red-600"
+                                    >
+                                        <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+                                        Sil
+                                    </button>
+                                </div>
                             </div>
                         );
                     })

@@ -168,7 +168,7 @@ export default function NewSpecialty() {
                     <Input
                         value={specialtyCode}
                         placeholder="İxtisasın kodu"
-                        onChange={(e) => setSpecialtyCode(e.target.value)}
+                        onChange={(e) => setSpecialtyCode(e.target.value.replace(/[^\p{L}\p{N}()-]/gu, ""))}
                         className="mb-[10px]"
                     />
                 </div>
