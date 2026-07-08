@@ -17,6 +17,8 @@ export default function NewSpecialty() {
     const [loading, setLoading] = useState(false);
     const [cafedras, setCafedras] = useState<Cafedra[]>([]);
     const [selectedCafedra, setSelectedCafedra] = useState("");
+    // 1 = Bakalavr (bachelor), 2 = Magistr (master)
+    const [degree, setDegree] = useState<number>(1);
     // const [ploText, setPloText] = useState("");
     // const [sloText, setSloText] = useState("");
     // const [gcoText, setGcoText] = useState("");
@@ -73,7 +75,8 @@ export default function NewSpecialty() {
             const specialty: SpecialtyPayload = {
                 cafedra_code: effectiveCafedraCode,
                 specialty_code: specialtyCode,
-                specialty_name: specialtyName
+                specialty_name: specialtyName,
+                degree: degree
             }
             const result = await addSpecialty(specialty, token ? token : "");
 
@@ -172,6 +175,20 @@ export default function NewSpecialty() {
                         className="mb-[10px]"
                     />
                 </div>
+            </div>
+            <div className="mb-[10px]">
+                <Label>
+                    Səviyyə
+                </Label>
+                <Select
+                    placeholder="Səviyyə seçin"
+                    defaultValue="1"
+                    onChange={(value) => setDegree(+value)}
+                    options={[
+                        { value: "1", label: "Bakalavr" },
+                        { value: "2", label: "Magistr" },
+                    ]}
+                />
             </div>
             {/* <Label>
                 Proqramın Təsviri

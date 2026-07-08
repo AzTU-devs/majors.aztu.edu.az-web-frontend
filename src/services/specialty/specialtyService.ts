@@ -6,12 +6,15 @@ export interface Specialty {
     cafedra_name: string;
     specialty_name: string;
     specialty_code: string;
+    // 1 = Bakalavr (bachelor), 2 = Magistr (master)
+    degree?: number;
 }
 
 export interface SpecialtyPayload {
     cafedra_code: string;
     specialty_name: string;
     specialty_code: string;
+    degree: number;
 }
 
 export const addSpecialty = async (specialty: SpecialtyPayload, token: string) => {
@@ -66,7 +69,7 @@ export interface SpecialtyUpdateResult {
 
 export const updateSpecialty = async (
     specialtyCode: string,
-    payload: { specialty_name?: string; new_specialty_code?: string }
+    payload: { specialty_name?: string; new_specialty_code?: string; degree?: number }
 ): Promise<SpecialtyUpdateResult> => {
     try {
         const response = await apiClient.put(`/api/specialty/${specialtyCode}`, payload);

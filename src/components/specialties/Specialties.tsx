@@ -12,6 +12,8 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { getSpecialtiesByCafedra, getAllSpecialties, deleteSpecialty, updateSpecialty, Specialty } from "../../services/specialty/specialtyService";
 
+const degreeLabel = (d?: number) => (d === 2 ? "Magistr" : "Bakalavr");
+
 // Escape user text before injecting into a SweetAlert `html` dialog.
 const esc = (s: string) =>
     (s ?? "")
@@ -99,7 +101,11 @@ export default function Specialties() {
             title: "İxtisası redaktə et",
             html:
                 `<input id="swal-sp-name" class="swal2-input" placeholder="İxtisasın adı" value="${esc(specialty.specialty_name)}">` +
-                `<input id="swal-sp-code" class="swal2-input" placeholder="İxtisasın kodu" value="${esc(specialty.specialty_code)}">`,
+                `<input id="swal-sp-code" class="swal2-input" placeholder="İxtisasın kodu" value="${esc(specialty.specialty_code)}">` +
+                `<select id="swal-sp-degree" class="swal2-select">` +
+                `<option value="1" ${specialty.degree !== 2 ? "selected" : ""}>Bakalavr</option>` +
+                `<option value="2" ${specialty.degree === 2 ? "selected" : ""}>Magistr</option>` +
+                `</select>`,
             focusConfirm: false,
             showCancelButton: true,
             confirmButtonText: "Yadda saxla",
@@ -108,6 +114,7 @@ export default function Specialties() {
                 const name = (document.getElementById("swal-sp-name") as HTMLInputElement).value.trim();
                 const rawCode = (document.getElementById("swal-sp-code") as HTMLInputElement).value.trim();
                 const code = rawCode.replace(/[^\p{L}\p{N}()-]/gu, "");
+                const degree = Number((document.getElementById("swal-sp-degree") as HTMLSelectElement).value);
                 if (!name || !code) {
                     Swal.showValidationMessage("Ad və kod boş ola bilməz");
                     return;
@@ -116,15 +123,16 @@ export default function Specialties() {
                     Swal.showValidationMessage("Kod yalnız hərf, rəqəm və ( ) - simvollarından ibarət ola bilər");
                     return;
                 }
-                return { name, code };
+                return { name, code, degree };
             },
         });
         if (!value) return;
 
-        const payload: { specialty_name?: string; new_specialty_code?: string } = {};
+        const payload: { specialty_name?: string; new_specialty_code?: string; degree?: number } = {};
         if (value.name !== specialty.specialty_name) payload.specialty_name = value.name;
         if (value.code !== specialty.specialty_code) payload.new_specialty_code = value.code;
-        if (!payload.specialty_name && !payload.new_specialty_code) return;
+        if (value.degree !== (specialty.degree ?? 1)) payload.degree = value.degree;
+        if (!payload.specialty_name && !payload.new_specialty_code && payload.degree === undefined) return;
 
         const res = await updateSpecialty(specialty.specialty_code, payload);
         if (res.status === "SUCCESS") {
@@ -132,7 +140,7 @@ export default function Specialties() {
             setSpecialties((prev) =>
                 prev.map((s) =>
                     s.specialty_code === specialty.specialty_code
-                        ? { ...s, specialty_name: value.name, specialty_code: finalCode }
+                        ? { ...s, specialty_name: value.name, specialty_code: finalCode, degree: value.degree }
                         : s
                 )
             );
@@ -242,7 +250,7 @@ export default function Specialties() {
                                           {specialty.specialty_code}
                                       </span>
                                       <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
-                                          İxtisas
+                                          {degreeLabel(specialty.degree)}
                                       </span>
                                   </div>
 
