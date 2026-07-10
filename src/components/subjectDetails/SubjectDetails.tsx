@@ -433,8 +433,8 @@ export default function SubjectDeails() {
                                 onChange={e => setSemester(e.target.value)}
                                 className="h-10 w-full appearance-none rounded border border-gray-300 bg-white pl-10 pr-9 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                             >
-                                <option value={1}>Yaz semestri</option>
-                                <option value={2}>Payız semestri</option>
+                                <option value={1}>Payız semestri</option>
+                                <option value={2}>Yaz semestri</option>
                             </select>
                             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                                 <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />

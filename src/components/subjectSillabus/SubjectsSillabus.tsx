@@ -16,7 +16,7 @@ import {
 } from "../../constants/subjectMeta";
 
 const semesterLabel = (s?: number) =>
-    s === 1 ? "Yaz semestri" : s === 2 ? "Payız semestri" : "—";
+    s === 1 ? "Payız semestri" : s === 2 ? "Yaz semestri" : "—";
 const statusLabel = (s?: number) =>
     s === 1 ? "Seçmə" : s === 2 ? "Məcburi" : s === 3 ? "Digər" : "—";
 const typeLabel = (t: number) =>

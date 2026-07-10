@@ -19,6 +19,7 @@ import { getSpecialtyChar, deleteSpecialtyChar, updateSpecialtyChar, SpecialtyCh
 import { Subject, getCurriculaBySpecialtyCode, deleteCurricula } from "../../services/curricula/curricula";
 import SectionTabStrip from "../common/SectionTabStrip";
 import EmptyState from "../common/EmptyState";
+import { semesterLabel } from "../../constants/subjectMeta";
 
 const confirmDelete = async (label: string) =>
   (
@@ -713,7 +714,7 @@ export default function SpecialtyDetails() {
                       {subject.subject_name}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      {subject.semester != null && <span>Semestr {subject.semester}</span>}
+                      {subject.semester != null && <span>{semesterLabel(subject.semester)} semestri</span>}
                       {subject.credit != null && <span>{subject.credit} kredit</span>}
                     </div>
                     <div className="flex items-center gap-1 text-gray-400">

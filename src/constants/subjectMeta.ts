@@ -24,6 +24,15 @@ export const languageLabel = (v?: number | null) =>
         : v === 5 ? "Türk"
         : "—";
 
+// Semester — canonical mapping matching the backend + create form:
+// 1 = Payız (autumn), 2 = Yaz (spring).
+export const SEMESTER_OPTIONS = [
+    { value: "1", label: "Payız semestri" },
+    { value: "2", label: "Yaz semestri" },
+];
+export const semesterLabel = (v?: number | null) =>
+    v === 1 ? "Payız" : v === 2 ? "Yaz" : "—";
+
 // Teaching methods (stored as comma-separated keys)
 export const TEACHING_METHODS: { key: string; label: string }[] = [
     { key: "lecture", label: "mühazirə" },
