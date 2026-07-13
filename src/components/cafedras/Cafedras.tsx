@@ -123,6 +123,26 @@ export default function Cafedras() {
     }
   };
 
+  const handleToggleGeneral = async (c: Cafedra) => {
+    const next = !c.general_subjects_enabled;
+    // optimistic update
+    setCafedras((prev) =>
+      prev.map((x) =>
+        x.cafedra_code === c.cafedra_code ? { ...x, general_subjects_enabled: next } : x
+      )
+    );
+    const result = await updateCafedra(c.cafedra_code, { general_subjects_enabled: next });
+    if (result.status !== "SUCCESS") {
+      // revert on failure
+      setCafedras((prev) =>
+        prev.map((x) =>
+          x.cafedra_code === c.cafedra_code ? { ...x, general_subjects_enabled: !next } : x
+        )
+      );
+      Swal.fire("Xəta!", result.message || "Dəyişiklik yadda saxlanıla bilmədi.", "error");
+    }
+  };
+
   const filtered = cafedras.filter(
     (c) =>
       c.cafedra_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -210,6 +230,15 @@ export default function Cafedras() {
                     Fakültə: {c.faculty_code}
                   </p>
                 )}
+                <label className="mt-1 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={!!c.general_subjects_enabled}
+                    onChange={() => handleToggleGeneral(c)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  Ümumi fənlər modulu
+                </label>
                 <div className="mt-2 flex items-center gap-2">
                   <button
                     onClick={() => handleEdit(c)}

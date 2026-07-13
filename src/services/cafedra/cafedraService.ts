@@ -5,6 +5,7 @@ export interface Cafedra {
     faculty_code: string;
     cafedra_code: string;
     cafedra_name: string;
+    general_subjects_enabled?: boolean;
 }
 
 export interface CafedraPayload {
@@ -52,7 +53,7 @@ export interface CafedraMutationResult {
 
 export const updateCafedra = async (
     cafedra_code: string,
-    payload: { cafedra_name?: string; faculty_code?: string }
+    payload: { cafedra_name?: string; faculty_code?: string; general_subjects_enabled?: boolean }
 ): Promise<CafedraMutationResult> => {
     try {
         const response = await apiClient.put(`/api/cafedra/${cafedra_code}`, payload);

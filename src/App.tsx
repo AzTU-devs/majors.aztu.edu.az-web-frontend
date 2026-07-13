@@ -18,6 +18,7 @@ import RequireAuth from "./components/auth/RequireAuth";
 import RequireRole from "./components/auth/RequireRole";
 import UsersPage from "./pages/UsersPage/UsersPage";
 import AdminsPage from "./pages/AdminsPage/AdminsPage";
+import GeneralSubjectsPage from "./pages/GeneralSubjectsPage/GeneralSubjectsPage";
 import CompetencyMatchingTablePage from "./pages/CompetencyMatchingTablePage/CompetencyMatchingTablePage";
 import CloPloMatchingTablePage from "./pages/CloPloMatchingTablePage/CloPloMatchingTablePage";
 import { ScrollToTop } from "./components/common/ScrollToTop";
@@ -65,6 +66,9 @@ export default function App() {
               {/* Cafedras */}
               <Route path="/cafedras" element={<CafedrasPage />} />
             </Route>
+
+            {/* General subjects (Ümumi Fənlər) */}
+            <Route path="/general-subjects" element={<GeneralSubjectsPage />} />
 
             {/* Specialties */}
             <Route path="/specialties" element={<SpecialtiesPage />} />

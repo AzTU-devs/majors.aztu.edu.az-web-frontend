@@ -6,6 +6,7 @@ import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -36,6 +37,7 @@ const akademikItems: NavItem[] = [
   { icon: <AccountBalanceIcon />, name: "Fakültələr", path: "/faculties", roles: ADMIN_ONLY },
   { icon: <ApartmentIcon />, name: "Kafedralar", path: "/cafedras", roles: ADMIN_ONLY },
   { icon: <SchoolIcon />, name: "İxtisaslar", path: "/specialties" },
+  { icon: <LibraryBooksIcon />, name: "Ümumi Fənlər", path: "/general-subjects" },
   { icon: <MenuBookIcon />, name: "Ədəbiyyat", path: "/literatures", roles: ADMIN_ONLY },
 ];
 
