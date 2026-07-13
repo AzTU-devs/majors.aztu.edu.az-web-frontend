@@ -1,21 +1,33 @@
 import Swal from "sweetalert2";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSelector } from "react-redux";
 import { Skeleton } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Label from "../form/Label";
 import Select from "../form/Select";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import TextArea from "../form/input/TextArea";
+import { Modal } from "../ui/modal";
 import { RootState } from "../../redux/store";
-import { AssessmentRow } from "../../services/curricula/curricula";
+import {
+    AssessmentRow,
+    SubjectDetails,
+    getSubjectDetails,
+} from "../../services/curricula/curricula";
 import {
     DEFAULT_ASSESSMENT,
     FORM_OF_EDUCATION_OPTIONS,
     LANGUAGE_OPTIONS,
     SEMESTER_OPTIONS,
     semesterLabel,
+    formOfEducationLabel,
+    languageLabel,
+    parseTeachingMethods,
+    teachingMethodLabel,
 } from "../../constants/subjectMeta";
 import TeachingMethodsPicker from "../subjectMeta/TeachingMethodsPicker";
 import AssessmentEditor from "../subjectMeta/AssessmentEditor";
@@ -33,6 +45,20 @@ const statusOptions = [
     { value: "2", label: "Məcburi" },
     { value: "3", label: "Digər" },
 ];
+
+const statusLabel = (s?: number) =>
+    s === 1 ? "Seçmə" : s === 2 ? "Məcburi" : s === 3 ? "Digər" : "—";
+
+function Info({ k, v }: { k: string; v: ReactNode }) {
+    return (
+        <div>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                {k}
+            </p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{v}</p>
+        </div>
+    );
+}
 
 export default function GeneralSubjects() {
     const role = useSelector((s: RootState) => s.auth.role);
@@ -74,6 +100,15 @@ export default function GeneralSubjects() {
     const [generalSubjects, setGeneralSubjects] = useState<GeneralSubject[]>([]);
     const [listLoading, setListLoading] = useState(false);
     const [busy, setBusy] = useState<string | null>(null);
+
+    // create-form visibility (list-first view)
+    const [showForm, setShowForm] = useState(false);
+
+    // details modal
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [detailsLoading, setDetailsLoading] = useState(false);
+    const [details, setDetails] = useState<SubjectDetails | null>(null);
+    const [detailsSubject, setDetailsSubject] = useState<GeneralSubject | null>(null);
 
     // owner cafedra: role 2 uses own cafedra, admin uses the picked one
     const owner = isAdmin ? selectedOwner : cafedraCode ?? "";
@@ -199,6 +234,7 @@ export default function GeneralSubjects() {
                     text: "Ümumi fənn uğurla yaradıldı!",
                 });
                 resetForm();
+                setShowForm(false);
                 refreshList();
             } else if (result.status === "FORBIDDEN") {
                 Swal.fire({
@@ -264,6 +300,16 @@ export default function GeneralSubjects() {
         }
     };
 
+    const openDetails = async (gs: GeneralSubject) => {
+        setDetailsSubject(gs);
+        setDetails(null);
+        setDetailsOpen(true);
+        setDetailsLoading(true);
+        const res = await getSubjectDetails(gs.subject_code);
+        setDetails(res && typeof res === "object" ? (res as SubjectDetails) : null);
+        setDetailsLoading(false);
+    };
+
     if (bootstrapping) {
         return (
             <div className="space-y-3">
@@ -307,8 +353,21 @@ export default function GeneralSubjects() {
                         saxlayın.
                     </p>
                 </div>
-            ) : (
+            ) : showForm ? (
                 <>
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                            Yeni ümumi fənn
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={() => setShowForm(false)}
+                            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                        >
+                            <ArrowBackIcon sx={{ fontSize: 18 }} />
+                            Geri
+                        </button>
+                    </div>
                     {/* Create form */}
                     <div key={formKey} className="space-y-6">
                         <div className="flex justify-between items-center w-full">
@@ -497,12 +556,23 @@ export default function GeneralSubjects() {
                             </Button>
                         </div>
                     </div>
-
+                </>
+            ) : (
+                <>
                     {/* Existing general subjects */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white/90">
-                            Yaradılmış ümumi fənlər
-                        </h3>
+                        <div className="mb-2 flex items-center justify-between">
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-white/90">
+                                Yaradılmış ümumi fənlər
+                            </h3>
+                            <Button
+                                size="sm"
+                                startIcon={<AddIcon fontSize="small" />}
+                                onClick={() => setShowForm(true)}
+                            >
+                                Yeni ümumi fənn
+                            </Button>
+                        </div>
                         {listLoading ? (
                             <div className="space-y-3">
                                 {Array.from({ length: 3 }).map((_, i) => (
@@ -550,6 +620,14 @@ export default function GeneralSubjects() {
                                         <div className="flex flex-shrink-0 items-center gap-2">
                                             <Button
                                                 size="sm"
+                                                variant="outline"
+                                                startIcon={<VisibilityIcon fontSize="small" />}
+                                                onClick={() => openDetails(gs)}
+                                            >
+                                                Ətraflı
+                                            </Button>
+                                            <Button
+                                                size="sm"
                                                 variant="destructive"
                                                 disabled={busy === gs.subject_code}
                                                 startIcon={
@@ -567,6 +645,99 @@ export default function GeneralSubjects() {
                     </div>
                 </>
             )}
+
+            {/* Details modal */}
+            <Modal
+                isOpen={detailsOpen}
+                onClose={() => setDetailsOpen(false)}
+                className="max-w-2xl m-4 p-6 sm:p-8"
+            >
+                <h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+                    {detailsSubject?.subject_name}
+                </h3>
+                <p className="mb-5 font-mono text-xs text-gray-500 dark:text-gray-400">
+                    {detailsSubject?.subject_code}
+                </p>
+
+                {detailsLoading ? (
+                    <div className="space-y-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton key={i} variant="text" />
+                        ))}
+                    </div>
+                ) : details ? (
+                    <div className="space-y-4">
+                        {details.subject_description && (
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                                {details.subject_description}
+                            </p>
+                        )}
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            <Info k="Semestr" v={semesterLabel(details.semester)} />
+                            <Info k="Fənnin statusu" v={statusLabel(details.status)} />
+                            <Info k="Kredit" v={details.credit ?? "—"} />
+                            <Info k="Akademik il" v={details.year ?? "—"} />
+                            <Info k="Tələbənin iş yükü" v={details.hours_per_week ?? "—"} />
+                            <Info
+                                k="Təhsil forması"
+                                v={formOfEducationLabel(details.form_of_education)}
+                            />
+                            <Info
+                                k="Tədris dili"
+                                v={languageLabel(details.language_of_instruction)}
+                            />
+                        </div>
+                        {details.in_class_hours && (
+                            <Info k="Auditoriyadaxili saatlar" v={details.in_class_hours} />
+                        )}
+                        {details.out_of_class_hours && (
+                            <Info k="Auditoriya kənar saatlar" v={details.out_of_class_hours} />
+                        )}
+                        {parseTeachingMethods(details.teaching_methods).length > 0 && (
+                            <div>
+                                <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                    Tədris metodları
+                                </p>
+                                <div className="mt-1 flex flex-wrap gap-1.5">
+                                    {parseTeachingMethods(details.teaching_methods).map((m) => (
+                                        <span
+                                            key={m}
+                                            className="rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-white/10 dark:text-gray-200"
+                                        >
+                                            {teachingMethodLabel(m)}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        <div>
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Təyin olunmuş ixtisaslar
+                            </p>
+                            <div className="mt-1 flex flex-wrap gap-1.5">
+                                {(detailsSubject?.specialties ?? []).map((sp) => (
+                                    <span
+                                        key={sp.specialty_code}
+                                        className="rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
+                                    >
+                                        {sp.specialty_name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Detallar yüklənə bilmədi.
+                    </p>
+                )}
+
+                <div className="mt-6 flex justify-end">
+                    <Button variant="outline" onClick={() => setDetailsOpen(false)}>
+                        Bağla
+                    </Button>
+                </div>
+            </Modal>
         </div>
     );
 }
