@@ -71,10 +71,9 @@ export default function GeneralSubjects() {
     const [cafedras, setCafedras] = useState<Cafedra[]>([]);
     const [selectedOwner, setSelectedOwner] = useState("");
 
-    // specialties multi-select
+    // specialty (single selection)
     const [specialties, setSpecialties] = useState<Specialty[]>([]);
-    const [specialtySearch, setSpecialtySearch] = useState("");
-    const [selectedSpecialtyCodes, setSelectedSpecialtyCodes] = useState<string[]>([]);
+    const [selectedSpecialtyCode, setSelectedSpecialtyCode] = useState("");
 
     // subject fields (mirrors NewSubject)
     const [subjectName, setSubjectName] = useState("");
@@ -150,21 +149,14 @@ export default function GeneralSubjects() {
         refreshList();
     }, [refreshList]);
 
-    const filteredSpecialties = useMemo(() => {
-        const q = specialtySearch.trim().toLowerCase();
-        if (!q) return specialties;
-        return specialties.filter((s) =>
-            `${s.specialty_name} ${s.cafedra_name} ${s.specialty_code}`
-                .toLowerCase()
-                .includes(q)
-        );
-    }, [specialties, specialtySearch]);
-
-    const toggleSpecialty = (code: string) => {
-        setSelectedSpecialtyCodes((prev) =>
-            prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-        );
-    };
+    const specialtyOptions = useMemo(
+        () =>
+            specialties.map((s) => ({
+                value: s.specialty_code,
+                label: `${s.specialty_name} — ${s.cafedra_name} (${s.specialty_code})`,
+            })),
+        [specialties]
+    );
 
     const resetForm = () => {
         setSubjectName("");
@@ -181,8 +173,7 @@ export default function GeneralSubjects() {
         setOutOfClassHours("");
         setTeachingMethods([]);
         setAssessment(DEFAULT_ASSESSMENT);
-        setSelectedSpecialtyCodes([]);
-        setSpecialtySearch("");
+        setSelectedSpecialtyCode("");
         setFormKey((k) => k + 1);
     };
 
@@ -196,11 +187,11 @@ export default function GeneralSubjects() {
             });
             return;
         }
-        if (selectedSpecialtyCodes.length === 0) {
+        if (!selectedSpecialtyCode) {
             Swal.fire({
                 icon: "warning",
                 title: "İxtisas seçilməyib",
-                text: "Ən azı bir ixtisas seçin.",
+                text: "İxtisas seçin.",
                 confirmButtonText: "Ok",
             });
             return;
@@ -210,7 +201,7 @@ export default function GeneralSubjects() {
             setLoading(true);
             const result = await createGeneralSubject({
                 owner_cafedra_code: owner,
-                specialty_codes: selectedSpecialtyCodes,
+                specialty_codes: [selectedSpecialtyCode],
                 subject_code: subjectCode,
                 subject_name: subjectName,
                 subject_desc: subjectDesc,
@@ -498,56 +489,13 @@ export default function GeneralSubjects() {
 
                         {/* Specialty multi-select */}
                         <div className="w-full">
-                            <Label>İxtisaslar (digər kafedralar)</Label>
-                            <Input
-                                placeholder="İxtisas, kafedra və ya kod üzrə axtarın"
-                                value={specialtySearch}
-                                onChange={(e) => setSpecialtySearch(e.target.value)}
-                                className="mb-3"
+                            <Label>İxtisas (digər kafedra)</Label>
+                            <Select
+                                placeholder="İxtisas seçin"
+                                defaultValue={selectedSpecialtyCode}
+                                onChange={(value) => setSelectedSpecialtyCode(value)}
+                                options={specialtyOptions}
                             />
-                            <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 dark:border-white/10">
-                                {filteredSpecialties.length === 0 ? (
-                                    <p className="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                                        İxtisas tapılmadı.
-                                    </p>
-                                ) : (
-                                    filteredSpecialties.map((s) => {
-                                        const checked = selectedSpecialtyCodes.includes(
-                                            s.specialty_code
-                                        );
-                                        return (
-                                            <label
-                                                key={s.specialty_code}
-                                                className={`flex cursor-pointer items-center gap-3 border-b border-gray-100 px-3 py-2.5 text-sm transition last:border-b-0 dark:border-white/5 ${
-                                                    checked
-                                                        ? "bg-brand-50 dark:bg-brand-500/10"
-                                                        : "hover:bg-gray-50 dark:hover:bg-white/5"
-                                                }`}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={checked}
-                                                    onChange={() =>
-                                                        toggleSpecialty(s.specialty_code)
-                                                    }
-                                                    className="h-4 w-4 accent-brand-500"
-                                                />
-                                                <span className="text-gray-700 dark:text-gray-200">
-                                                    {s.specialty_name} — {s.cafedra_name}{" "}
-                                                    <span className="font-mono text-gray-500 dark:text-gray-400">
-                                                        ({s.specialty_code})
-                                                    </span>
-                                                </span>
-                                            </label>
-                                        );
-                                    })
-                                )}
-                            </div>
-                            {selectedSpecialtyCodes.length > 0 && (
-                                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                    {selectedSpecialtyCodes.length} ixtisas seçildi
-                                </p>
-                            )}
                         </div>
 
                         <div className="flex justify-end items-center">

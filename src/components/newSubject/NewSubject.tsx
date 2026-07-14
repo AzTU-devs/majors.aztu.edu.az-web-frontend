@@ -1,15 +1,12 @@
 import Swal from "sweetalert2";
-import { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useState } from 'react';
 import Label from '../form/Label';
 import Select from '../form/Select';
 import Button from '../ui/button/Button';
 import { useLocation } from 'react-router';
 import Input from '../form/input/InputField';
 import TextArea from '../form/input/TextArea';
-import { RootState } from '../../redux/store';
 import { addCurricula, AssessmentRow } from '../../services/curricula/curricula';
-import { getAllSpecialties, Specialty } from '../../services/specialty/specialtyService';
 import {
     FORM_OF_EDUCATION_OPTIONS,
     LANGUAGE_OPTIONS,
@@ -34,34 +31,6 @@ export default function NewSubject() {
     const [assessment, setAssessment] = useState<AssessmentRow[]>(DEFAULT_ASSESSMENT);
     const { specialtyCode } = location.state as { specialtyCode: string };
     const { specialtyName } = location.state as { specialtyName: string };
-
-    // Assign the subject to additional specialties (other cafedras) as well.
-    const token = useSelector((s: RootState) => s.auth.token);
-    const [specialties, setSpecialties] = useState<Specialty[]>([]);
-    const [specialtySearch, setSpecialtySearch] = useState("");
-    const [additionalSpecialtyCodes, setAdditionalSpecialtyCodes] = useState<string[]>([]);
-
-    useEffect(() => {
-        getAllSpecialties(token ?? "").then((res) => {
-            if (Array.isArray(res)) setSpecialties(res);
-        });
-    }, [token]);
-
-    const otherSpecialties = useMemo(() => {
-        const q = specialtySearch.trim().toLowerCase();
-        return specialties
-            .filter((s) => s.specialty_code !== specialtyCode)
-            .filter((s) =>
-                !q ||
-                `${s.specialty_name} ${s.cafedra_name} ${s.specialty_code}`.toLowerCase().includes(q)
-            );
-    }, [specialties, specialtySearch, specialtyCode]);
-
-    const toggleAdditional = (code: string) => {
-        setAdditionalSpecialtyCodes((prev) =>
-            prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-        );
-    };
 
     // academic year (Akademik il), free text like "2025-2026"
 
@@ -123,7 +92,6 @@ export default function NewSubject() {
                 out_of_class_hours: outOfClassHours,
                 teaching_methods: teachingMethods.join(","),
                 assessment: JSON.stringify(assessment),
-                additional_specialty_codes: additionalSpecialtyCodes,
             }
             const result = await addCurricula(subjectPayload);
 
@@ -327,54 +295,6 @@ export default function NewSubject() {
                     Qiymətləndirmə haqqında məlumat
                 </Label>
                 <AssessmentEditor rows={assessment} onChange={setAssessment} />
-            </div>
-            <div className="w-full">
-                <Label>
-                    Əlavə ixtisaslar (başqa kafedralar) — istəyə bağlı
-                </Label>
-                <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                    Bu fənn "{specialtyName}" ixtisasına əlavə olunur. İstəsəniz onu başqa
-                    ixtisaslara (başqa kafedralara) da təyin edə bilərsiniz.
-                </p>
-                <Input
-                    placeholder="İxtisas, kafedra və ya kod üzrə axtarın"
-                    value={specialtySearch}
-                    onChange={(e) => setSpecialtySearch(e.target.value)}
-                    className="mb-3"
-                />
-                <div className="max-h-56 overflow-y-auto rounded-xl border border-gray-200 dark:border-white/10">
-                    {otherSpecialties.length === 0 ? (
-                        <p className="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                            İxtisas tapılmadı.
-                        </p>
-                    ) : (
-                        otherSpecialties.map((s) => {
-                            const checked = additionalSpecialtyCodes.includes(s.specialty_code);
-                            return (
-                                <label
-                                    key={s.specialty_code}
-                                    className={`flex cursor-pointer items-center gap-3 border-b border-gray-100 px-3 py-2.5 text-sm transition last:border-b-0 dark:border-white/5 ${checked ? "bg-brand-50 dark:bg-brand-500/10" : "hover:bg-gray-50 dark:hover:bg-white/5"}`}
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={checked}
-                                        onChange={() => toggleAdditional(s.specialty_code)}
-                                        className="h-4 w-4 accent-brand-500"
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-200">
-                                        {s.specialty_name} — {s.cafedra_name}{" "}
-                                        <span className="font-mono text-gray-500 dark:text-gray-400">({s.specialty_code})</span>
-                                    </span>
-                                </label>
-                            );
-                        })
-                    )}
-                </div>
-                {additionalSpecialtyCodes.length > 0 && (
-                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        {additionalSpecialtyCodes.length} əlavə ixtisas seçildi
-                    </p>
-                )}
             </div>
             <div className='flex justify-end items-center'>
                 <Button disabled={loading} onClick={createSubject}>
