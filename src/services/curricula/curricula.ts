@@ -34,6 +34,8 @@ export interface SubjectPayload {
     out_of_class_hours?: string;
     teaching_methods?: string;
     assessment?: string;
+    // Optionally assign the subject to additional specialties (other cafedras).
+    additional_specialty_codes?: string[];
 };
 
 export interface SubjectDetails {
