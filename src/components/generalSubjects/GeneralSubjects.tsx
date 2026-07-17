@@ -1,9 +1,11 @@
 import Swal from "sweetalert2";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import { Skeleton } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Label from "../form/Label";
@@ -61,6 +63,7 @@ function Info({ k, v }: { k: string; v: ReactNode }) {
 }
 
 export default function GeneralSubjects() {
+    const navigate = useNavigate();
     const role = useSelector((s: RootState) => s.auth.role);
     const token = useSelector((s: RootState) => s.auth.token);
     const cafedraCode = useSelector((s: RootState) => s.auth.cafedra_code);
@@ -566,6 +569,21 @@ export default function GeneralSubjects() {
                                             )}
                                         </div>
                                         <div className="flex flex-shrink-0 items-center gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                startIcon={<ListAltIcon fontSize="small" />}
+                                                onClick={() =>
+                                                    navigate("/specialty-details/subjects/topics", {
+                                                        state: {
+                                                            subjectCode: gs.subject_code,
+                                                            subjectName: gs.subject_name,
+                                                        },
+                                                    })
+                                                }
+                                            >
+                                                Mövzular
+                                            </Button>
                                             <Button
                                                 size="sm"
                                                 variant="outline"
